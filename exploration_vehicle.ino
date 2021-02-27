@@ -16,6 +16,7 @@
 *                                       D2    - ROT ENC CLK
 */
 
+#include <SPI.h>
 #include <LiquidCrystal_I2C.h>
 #include <RF24.h>
 #include <nRF24L01.h>
