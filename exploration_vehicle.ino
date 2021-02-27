@@ -16,7 +16,10 @@
 *                                       D2    - ROT ENC CLK
 */
 
-
+#include <LiquidCrystal_I2C.h>
+#include <RF24.h>
+#include <nRF24L01.h>
+#include <Wire.h>
 
 void setup() {
 	
