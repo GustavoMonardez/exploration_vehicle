@@ -28,8 +28,11 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Initialization started...");
     
-	config_radio(Globals::transmitter, Globals::transmitter_address);
-   
+    config_radio(Globals::transmitter, Globals::transmitter_address);
+    config_joystick(Globals::j1_vrx_pin, INPUT, 
+                    Globals::j1_vry_pin, INPUT,
+                    Globals::j1_sw_pin, INPUT_PULLUP);
+    
     Serial.println("Initialization complete!\n\n");
 }
 

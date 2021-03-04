@@ -11,6 +11,7 @@
 #include <nRF24L01.h>
 #include <Wire.h>
 #include <SPI.h>
+#include "Joystick.h"
 
 
 namespace Globals {
@@ -41,8 +42,8 @@ namespace Globals {
 
 	// outgoing data
 	struct DataPackage {
-		// j1
-		// j2
+		Joystick j1;
+		Joystick j2;
 		// mpu-6050
 		// menu select
 	};
