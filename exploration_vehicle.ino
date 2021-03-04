@@ -47,7 +47,7 @@ void setup() {
 char text[] = "Hello World!";
 void loop() {
 	//Globals::transmitter.write(&text, sizeof(text));
-    process_joystick(data_pkg.j1);
+    process_joystick_alt(data_pkg.j1);
     Serial.print("left: ");
     Serial.println(data_pkg.j1.left);
     Serial.print("right: ");
