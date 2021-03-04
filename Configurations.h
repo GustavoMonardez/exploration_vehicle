@@ -1,5 +1,6 @@
 #pragma once
 
+#include <LiquidCrystal_I2C.h>
 #include <RF24.h>
 #include <nRF24L01.h>
 

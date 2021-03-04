@@ -16,6 +16,8 @@
 *                                       D2    - ROT ENC CLK
 */
 
+#include "Globals.h"
+#include "Configurations.h"
 #include <SPI.h>
 #include <LiquidCrystal_I2C.h>
 #include <RF24.h>
@@ -23,10 +25,16 @@
 #include <Wire.h>
 
 void setup() {
-	
+    Serial.begin(9600);
+    Serial.println("Initialization started...");
+    
+	config_radio(Globals::transmitter, Globals::transmitter_address);
+   
+    Serial.println("Initialization complete!\n\n");
 }
 
-
+char text[] = "Hello World!";
 void loop() {
-	
+	Globals::transmitter.write(&text, sizeof(text));
+	delay(1000);
 }
