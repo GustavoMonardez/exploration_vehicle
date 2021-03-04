@@ -38,6 +38,7 @@ void config_radio(RF24& radio, const uint64_t address) {
 *
 * @brief             - initializes and starts joystick
 *
+* @param[in]         - joystick handle
 * @param[in]         - x axis pin number
 * @param[in]         - x axis pin mode
 * @param[in]         - y axis pin number
@@ -49,9 +50,16 @@ void config_radio(RF24& radio, const uint64_t address) {
 *
 * @Note				 - none
 *********************************************************************/
-void config_joystick(const uint8_t vrx_pin, const uint8_t vrx_mode,
+void config_joystick(Joystick& j,
+    const uint8_t vrx_pin, const uint8_t vrx_mode,
 	const uint8_t vry_pin, const uint8_t vry_mode,
 	const uint8_t sw_pin, const uint8_t sw_mode) {
+
+    // link pins to joystick handle structure
+    j.vrx_pin = vrx_pin;
+    j.vry_pin = vry_pin;
+    j.sw_pin = sw_pin;
+    
 	// config pins
 	pinMode(vrx_pin, vrx_mode); 
 	pinMode(vry_pin, vry_mode);

@@ -3,10 +3,12 @@
 #include <LiquidCrystal_I2C.h>
 #include <RF24.h>
 #include <nRF24L01.h>
+#include "Joystick.h"
 
 void config_radio(RF24& radio, const uint64_t address);
 
-void config_joystick(const uint8_t vrx_pin, const uint8_t vrx_mode,
+void config_joystick(Joystick& j,
+    const uint8_t vrx_pin, const uint8_t vrx_mode,
 	const uint8_t vry_pin, const uint8_t vry_mode,
 	const uint8_t sw_pin, const uint8_t sw_mode);
 

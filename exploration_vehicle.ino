@@ -18,18 +18,26 @@
 
 #include "Globals.h"
 #include "Configurations.h"
+#include "ProcessDataOut.h"
 #include <SPI.h>
 #include <LiquidCrystal_I2C.h>
 #include <RF24.h>
 #include <nRF24L01.h>
 #include <Wire.h>
 
+using Globals::data_pkg;
+using Globals::j1_vrx_pin;
+using Globals::j1_vry_pin;
+using Globals::j1_sw_pin;
+
+
 void setup() {
     Serial.begin(9600);
     Serial.println("Initialization started...");
     
     config_radio(Globals::transmitter, Globals::transmitter_address);
-    config_joystick(Globals::j1_vrx_pin, INPUT, 
+    config_joystick(data_pkg.j1,
+                    Globals::j1_vrx_pin, INPUT, 
                     Globals::j1_vry_pin, INPUT,
                     Globals::j1_sw_pin, INPUT_PULLUP);
     
@@ -38,6 +46,15 @@ void setup() {
 
 char text[] = "Hello World!";
 void loop() {
-	Globals::transmitter.write(&text, sizeof(text));
-	delay(1000);
+	//Globals::transmitter.write(&text, sizeof(text));
+    process_joystick(data_pkg.j1);
+    Serial.print("left: ");
+    Serial.println(data_pkg.j1.left);
+    Serial.print("right: ");
+    Serial.println(data_pkg.j1.right);
+    Serial.print("down: ");
+    Serial.println(data_pkg.j1.down);
+    Serial.print("up: ");
+    Serial.println(data_pkg.j1.up);
+	delay(2000);
 }
