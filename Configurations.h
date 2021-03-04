@@ -3,7 +3,7 @@
 #include <RF24.h>
 #include <nRF24L01.h>
 
-void config_radio(RF24& radio);
+void config_radio(RF24& radio, const uint64_t address);
 
 void config_joystick(const uint8_t vrx_pin, const uint8_t vrx_mode,
 	const uint8_t vry_pin, const uint8_t vry_mode,
