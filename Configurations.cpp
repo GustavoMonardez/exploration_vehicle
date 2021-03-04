@@ -8,6 +8,7 @@
  */
 #include "Configurations.h"
 #include "RotaryEncoder.h"
+#include "LcdCustomCharacters.h"
 
 
 /*********************************************************************
@@ -89,7 +90,20 @@ void config_rot_encoder(const uint8_t clk_pin, const uint8_t clk_mode,
 }
 
 void config_display(LiquidCrystal_I2C& lcd) {
+	lcd.init();
+	lcd.backlight();
+	lcd.createChar(0, select_arrow);
+	lcd.clear();
+	lcd.setCursor(0, 1);
+	lcd.write(0);
+	lcd.setCursor(2, 0);
+	/* temp menu,to be updated once it's defined */
+	lcd.print("EXP. VEHICLE");
+	lcd.setCursor(2, 1);
+	lcd.print("LIGHTS ON/OFF");
+	/*********************************************/
 
+	Serial.println("    Display config complete!");
 }
 
 void config_mpu_6050(const uint8_t mpu_addr) {
