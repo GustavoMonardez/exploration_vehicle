@@ -90,6 +90,17 @@ void config_rot_encoder(const uint8_t clk_pin, const uint8_t clk_mode,
 	Serial.println("    Rotary Encoder config complete!");
 }
 
+/*********************************************************************
+* @fn                - config_display
+*
+* @brief             - initializes lcd display
+*
+* @param[in]         - reference to lcd object
+*
+* @return            - none
+*
+* @Note				 - none
+*********************************************************************/
 void config_display(LiquidCrystal_I2C& lcd) {
 	lcd.init();
 	lcd.backlight();
@@ -107,12 +118,25 @@ void config_display(LiquidCrystal_I2C& lcd) {
 	Serial.println("    Display config complete!");
 }
 
-void config_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg, const uint8_t start_addr) {
+/*********************************************************************
+* @fn                - config_mpu_6050
+*
+* @brief             - wake up and initial calibration of mpu-6050
+*
+* @param[in]         - address to the mpu module
+* @param[in]         - address to power management 1 register
+* @param[in]         - start address of data register
+*
+* @return            - none
+*
+* @Note				 - none
+*********************************************************************/
+void config_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg, const uint8_t data_addr) {
 	// initialize
 	init_mpu_6050(mpu_addr, pwr_mgmt_reg);
 
 	// calibrate
-	calibrate_mpu_6050(mpu_addr, start_addr);
+	calibrate_mpu_6050(mpu_addr, data_addr);
 
 	Serial.println("    MPU-6050 config complete!");
 }

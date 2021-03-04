@@ -15,4 +15,4 @@ void config_rot_encoder(const uint8_t clk_pin, const uint8_t clk_mode,
 
 void config_display(LiquidCrystal_I2C& lcd);
 
-void config_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg, const uint8_t start_addr);
+void config_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg, const uint8_t data_addr);
