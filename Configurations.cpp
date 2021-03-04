@@ -9,6 +9,7 @@
 #include "Configurations.h"
 #include "RotaryEncoder.h"
 #include "LcdCustomCharacters.h"
+#include "Mpu6050.h"
 
 
 /*********************************************************************
@@ -106,6 +107,12 @@ void config_display(LiquidCrystal_I2C& lcd) {
 	Serial.println("    Display config complete!");
 }
 
-void config_mpu_6050(const uint8_t mpu_addr) {
+void config_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg, const uint8_t start_addr) {
+	// initialize
+	init_mpu_6050(mpu_addr, pwr_mgmt_reg);
 
+	// calibrate
+	calibrate_mpu_6050(mpu_addr, start_addr);
+
+	Serial.println("    MPU-6050 config complete!");
 }
