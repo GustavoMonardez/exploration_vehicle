@@ -16,7 +16,7 @@
 namespace Globals {
 	// transmitter
 	RF24 transmitter(10, 9); // CE, CSN;
-	const char transmitter_address[6] = { "00001" };
+	const uint64_t transmitter_address = 0x0000000001;
 	
 	// joystick 1 pins
 	const uint8_t j1_vrx_pin	= A0;
