@@ -11,6 +11,9 @@
 #include "LcdCustomCharacters.h"
 #include "Mpu6050.h"
 
+// helper functions prototypes
+void init_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg);
+void calibrate_mpu_6050(const uint8_t mpu_addr, const uint8_t data_addr);
 
 /*********************************************************************
 * @fn                - config_radio

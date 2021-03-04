@@ -119,6 +119,22 @@ void process_joystick_alt(Joystick& j) {
 }
 
 /*********************************************************************
+* @fn                - process_mpu_6050
+*
+* @brief             - process input data from mpu-6050 (x,y axis)
+*
+* @param[in]         - Joystick object
+* 
+* @return            - none
+*
+* @Note              - alternate version that processes vrx values
+*                      as down/up and vry values as left/right
+*********************************************************************/
+void process_mpu_6050(Mpu6050& mpu) {
+    
+}
+
+/*********************************************************************
 * @fn                - send_data
 *
 * @brief             - send data from all modules via NRF24
