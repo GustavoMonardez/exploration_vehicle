@@ -34,7 +34,7 @@ using Globals::j1_sw_pin;
 void setup() {
     Serial.begin(9600);
     Serial.println("Initialization started...");
-    
+    Serial.print("data_pkg: ");Serial.println(sizeof(data_pkg));
     config_radio(Globals::transmitter, Globals::transmitter_address);
     config_joystick(data_pkg.j1,
                     Globals::j1_vrx_pin, INPUT, 

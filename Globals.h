@@ -12,6 +12,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include "Joystick.h"
+#include "Mpu6050.h"
 
 
 namespace Globals {
@@ -44,8 +45,10 @@ namespace Globals {
 	struct DataPackage {
 		Joystick j1;
 		Joystick j2;
-		// mpu-6050
-		// menu select
+		
+        Mpu6050 mpu;
+
+        uint8_t menu_select;
 	};
 	DataPackage data_pkg;
 }

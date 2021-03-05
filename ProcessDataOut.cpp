@@ -6,9 +6,21 @@
  * @author Gustavo Monardez
  *
  */
-#include "ProcessDataOut.h"
-#include "wiring_private.h"
+#include "ProcessDataOut.h"     // func prototypes
+#include "wiring_private.h"     // analog read
+#include <Wire.h>               // mpu-6050
 
+// helper functions prototypes
+void read_mpu_6050_data(Mpu6050& mpu);
+
+// mpu-6050 raw data variables
+int16_t raw_x_acc;
+int16_t raw_y_acc;
+int16_t raw_z_acc;
+int16_t raw_temp;
+int16_t raw_x_gyro;
+int16_t raw_y_gyro;
+int16_t raw_z_gyro;
 
 /*********************************************************************
 * @fn                - process_joystick
@@ -131,7 +143,10 @@ void process_joystick_alt(Joystick& j) {
 *                      as down/up and vry values as left/right
 *********************************************************************/
 void process_mpu_6050(Mpu6050& mpu) {
-    
+    // read raw data from device
+    read_mpu_6050_data(mpu);
+
+    //mpu.
 }
 
 /*********************************************************************
@@ -147,4 +162,19 @@ void process_mpu_6050(Mpu6050& mpu) {
 *********************************************************************/
 void send_data() {
     
+}
+
+// helper functions prototypes
+void read_mpu_6050_data(Mpu6050& mpu) {
+    Wire.beginTransmission(mpu.device_addr());
+    Wire.write(mpu.start_data_addr());  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.endTransmission(false);
+    Wire.requestFrom(mpu.device_addr(),(uint8_t*)14,(uint8_t*)true);  // request a total of 14 registers
+    raw_x_acc  = Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
+    raw_y_acc  = Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+    raw_z_acc  = Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    raw_temp   = Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+    raw_x_gyro = Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+    raw_y_gyro = Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+    raw_z_gyro = Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
 }
