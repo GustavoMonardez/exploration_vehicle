@@ -55,14 +55,23 @@ void setup() {
 char text[] = "Hello World!";
 void loop() {
 	//Globals::transmitter.write(&text, sizeof(text));
-    process_joystick_alt(data_pkg.j1);
-    Serial.print("left: ");
-    Serial.println(data_pkg.j1.left);
-    Serial.print("right: ");
-    Serial.println(data_pkg.j1.right);
-    Serial.print("down: ");
-    Serial.println(data_pkg.j1.down);
-    Serial.print("up: ");
-    Serial.println(data_pkg.j1.up);
+//    process_joystick_alt(data_pkg.j1);
+//    Serial.print("left: ");
+//    Serial.println(data_pkg.j1.left);
+//    Serial.print("right: ");
+//    Serial.println(data_pkg.j1.right);
+//    Serial.print("down: ");
+//    Serial.println(data_pkg.j1.down);
+//    Serial.print("up: ");
+//    Serial.println(data_pkg.j1.up);
+    process_mpu_6050(data_pkg.mpu);
+    Serial.print("mpu left: ");
+    Serial.println(data_pkg.mpu.left());
+    Serial.print("mpu right: ");
+    Serial.println(data_pkg.mpu.right());
+    Serial.print("mpu down: ");
+    Serial.println(data_pkg.mpu.down());
+    Serial.print("mpu up: ");
+    Serial.println(data_pkg.mpu.up());
 	delay(2000);
 }

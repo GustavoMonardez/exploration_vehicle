@@ -169,12 +169,24 @@ void process_mpu_6050(Mpu6050& mpu) {
     calib_y_acc = get_calibrated_y_acc(mpu);
     
     // save left/right calibrated data on mpu handle
-    if (calib_x_acc < 0) mpu.left(calib_x_acc);
-    else mpu.right(calib_x_acc);
-
+    if (calib_x_acc < 0) { 
+        // convert to positive num before assigning
+        mpu.left(calib_x_acc * -1);
+        mpu.right(0);
+    } else {
+        mpu.right(calib_x_acc);
+        mpu.left(0);
+    }
+    
     // save down/up calibrated data on mpu handle
-    if (calib_y_acc < 0) mpu.down(calib_y_acc);
-    else mpu.up(calib_y_acc);
+    if (calib_y_acc < 0) {
+        // convert to positive num before assigning
+        mpu.down(calib_y_acc  * -1);
+        mpu.up(0);
+    } else {
+        mpu.up(calib_y_acc);
+        mpu.down(0);
+    }
 }
 
 /*********************************************************************
