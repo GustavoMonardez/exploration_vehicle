@@ -25,21 +25,29 @@
 #include <nRF24L01.h>
 #include <Wire.h>
 
+using Globals::transmitter;
+using Globals::transmitter_address;
 using Globals::data_pkg;
+// joystick
 using Globals::j1_vrx_pin;
 using Globals::j1_vry_pin;
 using Globals::j1_sw_pin;
 
+// mpu-6050
+using Globals::mpu_addr;
+using Globals::pwr_mgmt_1;
+using Globals::start_data_addr;
 
 void setup() {
     Serial.begin(9600);
     Serial.println("Initialization started...");
     Serial.print("data_pkg: ");Serial.println(sizeof(data_pkg));
-    config_radio(Globals::transmitter, Globals::transmitter_address);
+    config_radio(transmitter, transmitter_address);
     config_joystick(data_pkg.j1,
-                    Globals::j1_vrx_pin, INPUT, 
-                    Globals::j1_vry_pin, INPUT,
-                    Globals::j1_sw_pin, INPUT_PULLUP);
+                    j1_vrx_pin, INPUT, 
+                    j1_vry_pin, INPUT,
+                    j1_sw_pin, INPUT_PULLUP);
+    config_mpu_6050(data_pkg.mpu, mpu_addr, pwr_mgmt_1, start_data_addr);
     
     Serial.println("Initialization complete!\n\n");
 }

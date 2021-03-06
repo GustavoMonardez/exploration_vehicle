@@ -39,7 +39,9 @@ namespace Globals {
 	LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 	// mpu-6050
-	const uint8_t mpu_addr		= 0x68;
+	const uint8_t mpu_addr		    = 0x68;
+    const uint8_t pwr_mgmt_1        = 0x6B;
+    const uint8_t start_data_addr   = 0x3B;
 
 	// outgoing data
 	struct DataPackage {

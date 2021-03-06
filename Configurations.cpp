@@ -11,9 +11,23 @@
 #include "LcdCustomCharacters.h"
 #include "Mpu6050.h"
 
+// mpu-6050 local variables
+int16_t acc_buffer = 180;
+struct MpuRawData {
+    int16_t x_acc;
+    int16_t y_acc;
+    int16_t z_acc;
+    int16_t temp;
+    int16_t x_gyro;
+    int16_t y_gyro;
+    int16_t z_gyro;
+};
+
 // helper functions prototypes
-void init_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg);
-void calibrate_mpu_6050(const uint8_t mpu_addr, const uint8_t data_addr);
+void read_mpu_6050_raw(Mpu6050& mpu, MpuRawData& data);
+void init_mpu_6050(Mpu6050& mpu);
+void calibrate_mpu_6050(Mpu6050& mpu);
+
 
 /*********************************************************************
 * @fn                - config_radio
@@ -134,6 +148,7 @@ void config_display(LiquidCrystal_I2C& lcd) {
 *
 * @brief             - wake up and initial calibration of mpu-6050
 *
+* @param[in]         - mpu handle
 * @param[in]         - address to the mpu module
 * @param[in]         - address to power management 1 register
 * @param[in]         - start address of data register
@@ -142,12 +157,68 @@ void config_display(LiquidCrystal_I2C& lcd) {
 *
 * @Note				 - none
 *********************************************************************/
-void config_mpu_6050(const uint8_t mpu_addr, const uint8_t pwr_mgmt_reg, const uint8_t data_addr) {
+void config_mpu_6050(Mpu6050& mpu,
+    const uint8_t mpu_addr, 
+    const uint8_t pwr_mgmt_reg, 
+    const uint8_t data_addr) {
+
+    // link addresses to mpu handle structure
+    mpu.device_addr(mpu_addr);
+    mpu.pwr_mgmt_reg_addr(pwr_mgmt_reg);
+    mpu.start_data_addr(data_addr);
+    
 	// initialize
-	init_mpu_6050(mpu_addr, pwr_mgmt_reg);
+	init_mpu_6050(mpu);
 
 	// calibrate
-	calibrate_mpu_6050(mpu_addr, data_addr);
+	calibrate_mpu_6050(mpu);
 
 	Serial.println("    MPU-6050 config complete!");
+}
+
+// helper functions 
+void read_mpu_6050_raw(Mpu6050& mpu, MpuRawData& data) {
+    Wire.beginTransmission(mpu.device_addr());
+    Wire.write(mpu.start_data_addr());  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.endTransmission(false);
+    Wire.requestFrom(mpu.device_addr(),(uint8_t*)14,(uint8_t*)true);  // request a total of 14 registers
+    data.x_acc  = Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
+    data.y_acc  = Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+    data.z_acc  = Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    data.temp   = Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+    data.x_gyro = Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+    data.y_gyro = Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+    data.z_gyro = Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+}
+
+void init_mpu_6050(Mpu6050& mpu) {
+    Wire.begin();
+    Wire.beginTransmission(mpu.device_addr());
+    Wire.write(mpu.pwr_mgmt_reg_addr());  // PWR_MGMT_1 register
+    Wire.write(0);     // set to zero (wakes up the MPU-6050)
+    Wire.endTransmission(true);
+}
+
+void calibrate_mpu_6050(Mpu6050& mpu) {
+    // used to calculate oscillating range
+    MpuRawData mpu_raw_data;
+    for (uint8_t i = 0; i < 255; ++i) {
+        // read data
+        read_mpu_6050_raw(mpu, mpu_raw_data);
+
+        // left / right
+        mpu.min_x_acc(min(mpu.min_x_acc(), mpu_raw_data.x_acc));
+        mpu.max_x_acc(max(mpu.max_x_acc(), mpu_raw_data.x_acc));
+
+        // forward / backward
+        mpu.min_y_acc(min(mpu.min_y_acc(), mpu_raw_data.y_acc));
+        mpu.max_y_acc(max(mpu.max_y_acc(), mpu_raw_data.y_acc));
+    }
+    // once the range is established, we add a small buffer
+    // to help minimize false readings
+    mpu.min_x_acc(mpu.min_x_acc() - acc_buffer);
+    mpu.max_x_acc(mpu.max_x_acc() + acc_buffer);
+    
+    mpu.min_y_acc(mpu.min_y_acc() - acc_buffer);
+    mpu.max_y_acc(mpu.max_y_acc() + acc_buffer);
 }
