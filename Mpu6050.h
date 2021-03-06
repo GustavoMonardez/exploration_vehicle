@@ -14,6 +14,10 @@ public:
     uint8_t start_data_addr();
 
     // getters: boundaries
+    int16_t lower_boundary();
+    int16_t upper_boundary();
+    
+    // getters: oscillating range
     int16_t min_x_acc();
     int16_t max_x_acc();
     int16_t min_y_acc();
@@ -31,6 +35,10 @@ public:
     void start_data_addr(uint8_t val);
 
     // setters: boundaries
+    void lower_boundary(int16_t val);
+    void upper_boundary(int16_t val);
+    
+    // setters: oscillating range
     void min_x_acc(int16_t val);
     void max_x_acc(int16_t val);
     void min_y_acc(int16_t val);
@@ -42,10 +50,19 @@ private:
     uint8_t _down;
     uint8_t _up;
 
+    // hardware addresses
     uint8_t _device_addr;
     uint8_t _pwr_mgmt_reg_addr;
     uint8_t _start_data_addr;
 
+    // max lower/upper values to consider
+    int16_t _lower_boundary;
+    int16_t _upper_boundary;
+
+    // even in a static, resting position, x,y,z values 
+    // will oscillate, going up and down in a range
+    // the below variables will help determine that range in order
+    // to provide with a more consistent "zero" position.
     int16_t _min_x_acc;
     int16_t _max_x_acc;
     int16_t _min_y_acc;

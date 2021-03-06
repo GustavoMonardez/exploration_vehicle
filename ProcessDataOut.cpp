@@ -12,6 +12,8 @@
 
 // helper functions prototypes
 void read_mpu_6050_data(Mpu6050& mpu);
+int16_t get_calibrated_x_acc(Mpu6050& mpu);
+int16_t get_calibrated_y_acc(Mpu6050& mpu);
 
 // mpu-6050 raw data variables
 int16_t raw_x_acc;
@@ -22,6 +24,20 @@ int16_t raw_x_gyro;
 int16_t raw_y_gyro;
 int16_t raw_z_gyro;
 
+// mpu-6050 calibrated data variables
+int16_t calib_x_acc;
+int16_t calib_y_acc;
+int16_t calib_z_acc;
+int16_t calib_temp;
+int16_t calib_x_gyro;
+int16_t calib_y_gyro;
+int16_t calib_z_gyro;
+
+// mpu-6050 pwm variables
+const int16_t pwm_x_val = 255;
+const int16_t pwm_y_val = 255;
+
+ 
 /*********************************************************************
 * @fn                - process_joystick
 *
@@ -146,7 +162,19 @@ void process_mpu_6050(Mpu6050& mpu) {
     // read raw data from device
     read_mpu_6050_data(mpu);
 
-    //mpu.
+    // get left/right calibrated data
+    calib_x_acc = get_calibrated_x_acc(mpu);
+
+    // get down/up calibrated data
+    calib_y_acc = get_calibrated_y_acc(mpu);
+    
+    // save left/right calibrated data on mpu handle
+    if (calib_x_acc < 0) mpu.left(calib_x_acc);
+    else mpu.right(calib_x_acc);
+
+    // save down/up calibrated data on mpu handle
+    if (calib_y_acc < 0) mpu.down(calib_y_acc);
+    else mpu.up(calib_y_acc);
 }
 
 /*********************************************************************
@@ -164,7 +192,7 @@ void send_data() {
     
 }
 
-// helper functions prototypes
+// helper functions
 void read_mpu_6050_data(Mpu6050& mpu) {
     Wire.beginTransmission(mpu.device_addr());
     Wire.write(mpu.start_data_addr());  // starting with register 0x3B (ACCEL_XOUT_H)
@@ -177,4 +205,52 @@ void read_mpu_6050_data(Mpu6050& mpu) {
     raw_x_gyro = Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
     raw_y_gyro = Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
     raw_z_gyro = Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+}
+
+int16_t get_calibrated_x_acc(Mpu6050& mpu) {
+    // ignore oscillating values within the min_x_acc and max_x_acc range
+    // as this is a range of values that will be present, even when the 
+    // mpu is not moving
+    if (raw_x_acc >= mpu.min_x_acc() && raw_x_acc <= mpu.max_x_acc()) return 0;
+
+    // if the min and max values are outside of the pre-determined
+    // range, return the the max pwm values
+    if (raw_x_acc < mpu.lower_boundary()) return pwm_x_val * -1;
+    if (raw_x_acc > mpu.upper_boundary()) return pwm_x_val;
+
+    // if the raw value is less than the min_x_acc
+    // the mpu has been tilted to the left, in this case
+    // represented as a negative value ranging from -1 to -255
+    int8_t sign = (raw_x_acc < mpu.min_x_acc()) ? -1 : 1;
+
+    /* map input data to values according to the following:
+    *     left/down: -1 to -255
+    *     down/up:    1 to  255
+    *     neutral:    0
+    */     
+    return map(raw_x_acc, mpu.min_x_acc(), (sign*mpu.upper_boundary()), 0, (sign*pwm_x_val)); 
+}
+
+int16_t get_calibrated_y_acc(Mpu6050& mpu) {
+    // ignore oscillating values within the min_y_acc and max_y_acc range
+    // as this is a range of values that will be present, even when the 
+    // mpu is not moving
+    if (raw_y_acc >= mpu.min_y_acc() && raw_y_acc <= mpu.max_y_acc()) return 0;
+
+    // if the min and max values are outside of the pre-determined
+    // range, return the the max down/up pwm values
+    if (raw_y_acc < mpu.lower_boundary()) return pwm_y_val * -1;
+    if (raw_y_acc > mpu.upper_boundary()) return pwm_y_val;
+
+    // if the raw value is less than the min_x_acc
+    // the mpu has been tilted to the left, in this case
+    // represented as a negative value ranging from -1 to -255
+    int8_t sign = (raw_y_acc < mpu.min_y_acc()) ? -1 : 1;
+
+    /* map input data to values according to the following:
+    *     left/down: -1 to -255
+    *     down/up:    1 to  255
+    *     neutral:    0
+    */     
+    return map(raw_y_acc, mpu.min_y_acc(), (sign*mpu.upper_boundary()), 0, (sign*pwm_y_val)); 
 }
