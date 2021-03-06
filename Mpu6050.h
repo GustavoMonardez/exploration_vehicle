@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+
 class Mpu6050{
 public:
+    Mpu6050();
     // getters: values
     uint8_t left();
     uint8_t right();
