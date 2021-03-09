@@ -13,10 +13,6 @@ void config_joystick(Joystick& j,
 	const uint8_t vry_pin, const uint8_t vry_mode,
 	const uint8_t sw_pin, const uint8_t sw_mode);
 
-void config_rot_encoder(const uint8_t clk_pin, const uint8_t clk_mode,
-	const uint8_t dt_pin, const uint8_t dt_mode,
-	const uint8_t sw_pin, const uint8_t sw_mode);
-
 void config_display(LiquidCrystal_I2C& lcd);
 
 void config_mpu_6050(Mpu6050& mpu,

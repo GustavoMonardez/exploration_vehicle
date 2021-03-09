@@ -7,7 +7,6 @@
  *
  */
 #include "Configurations.h"
-#include "RotaryEncoder.h"
 #include "LcdCustomCharacters.h"
 #include "Mpu6050.h"
 
@@ -83,36 +82,6 @@ void config_joystick(Joystick& j,
 	pinMode(sw_pin, sw_mode);
 
 	Serial.println("    Joysticks config complete!");
-}
-
-/*********************************************************************
-* @fn                - config_rot_encoder
-*
-* @brief             - initializes and attaches isr to clk pin
-*
-* @param[in]         - clk pin number
-* @param[in]         - clk pin mode
-* @param[in]         - data pin number
-* @param[in]         - data pin mode
-* @param[in]         - sw pin number
-* @param[in]         - sw pin mode
-*
-* @return            - none
-*
-* @Note				 - none
-*********************************************************************/
-void config_rot_encoder(const uint8_t clk_pin, const uint8_t clk_mode,
-	const uint8_t dt_pin, const uint8_t dt_mode,
-	const uint8_t sw_pin, const uint8_t sw_mode) {
-	// config pins
-	pinMode(clk_pin, clk_mode);
-	pinMode(dt_pin, dt_mode);
-	pinMode(sw_pin, sw_mode);
-
-	// Attach the routine to service the interrupts
-	attachInterrupt(digitalPinToInterrupt(clk_pin), rot_encoder_isr, LOW);
-
-	Serial.println("    Rotary Encoder config complete!");
 }
 
 /*********************************************************************

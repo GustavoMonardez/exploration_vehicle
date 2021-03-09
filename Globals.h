@@ -30,11 +30,6 @@ namespace Globals {
 	const uint8_t j2_vry_pin	= A3;
 	const uint8_t j2_sw_pin		= 6;
 
-	// rotary encoder pins
-	const uint8_t re_clk_pin	= 2;
-	const uint8_t re_dt_pin		= 3;
-	const uint8_t re_sw_pin		= 4;
-
 	// display unit
 	LiquidCrystal_I2C lcd(0x27, 16, 2);
 
