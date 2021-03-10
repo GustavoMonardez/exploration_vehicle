@@ -5,5 +5,5 @@
 
 void process_joystick(Joystick& j);
 void process_joystick_alt(Joystick& j);
-void process_mpu_6050(Mpu6050& mpu);
+void process_mpu_6050(Mpu6050::Instance& mpu);
 void send_data();

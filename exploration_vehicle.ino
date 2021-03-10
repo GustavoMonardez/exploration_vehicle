@@ -48,7 +48,7 @@ void setup() {
                     j1_vrx_pin, INPUT, 
                     j1_vry_pin, INPUT,
                     j1_sw_pin, INPUT_PULLUP);
-    config_mpu_6050(data_pkg.mpu, mpu_addr, pwr_mgmt_1, start_data_addr);
+    config_mpu_6050(mpu_addr, pwr_mgmt_1, start_data_addr);
     config_rot_encoder();
     
     Serial.println("Initialization complete!\n\n");
@@ -66,15 +66,15 @@ void loop() {
 //    Serial.println(data_pkg.j1.down);
 //    Serial.print("up: ");
 //    Serial.println(data_pkg.j1.up);
-//    process_mpu_6050(data_pkg.mpu);
-//    Serial.print("mpu left: ");
-//    Serial.println(data_pkg.mpu.left());
-//    Serial.print("mpu right: ");
-//    Serial.println(data_pkg.mpu.right());
-//    Serial.print("mpu down: ");
-//    Serial.println(data_pkg.mpu.down());
-//    Serial.print("mpu up: ");
-//    Serial.println(data_pkg.mpu.up());
-//	delay(2000);
-    process_rot_encoder_isr();
+    process_mpu_6050(data_pkg.mpu);
+    Serial.print("mpu left: ");
+    Serial.println(data_pkg.mpu.left());
+    Serial.print("mpu right: ");
+    Serial.println(data_pkg.mpu.right());
+    Serial.print("mpu down: ");
+    Serial.println(data_pkg.mpu.down());
+    Serial.print("mpu up: ");
+    Serial.println(data_pkg.mpu.up());
+	delay(2000);
+//    process_rot_encoder_isr();
 }

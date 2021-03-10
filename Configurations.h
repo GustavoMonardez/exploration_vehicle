@@ -15,7 +15,7 @@ void config_joystick(Joystick& j,
 
 void config_display(LiquidCrystal_I2C& lcd);
 
-void config_mpu_6050(Mpu6050& mpu,
+void config_mpu_6050(
     const uint8_t mpu_addr, 
     const uint8_t pwr_mgmt_reg, 
     const uint8_t data_addr);

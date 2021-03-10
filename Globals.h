@@ -43,7 +43,7 @@ namespace Globals {
 		Joystick j1;
 		Joystick j2;
 		
-        Mpu6050 mpu;
+        Mpu6050::Instance mpu;
 
         uint8_t menu_select;
 	};
