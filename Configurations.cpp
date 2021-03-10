@@ -102,9 +102,9 @@ void config_display(LiquidCrystal_I2C& lcd) {
 	lcd.clear();
 	lcd.setCursor(0, 1);
 	lcd.write(0);
-	lcd.setCursor(2, 0);
+	lcd.setCursor(0, 0);
 	/* temp menu,to be updated once it's defined */
-	lcd.print("EXP. VEHICLE");
+	lcd.print("EXP. VEHICLE  0C");
 	lcd.setCursor(2, 1);
 	lcd.print("LIGHTS ON/OFF");
 	/*********************************************/

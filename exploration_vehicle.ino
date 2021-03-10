@@ -34,6 +34,9 @@ using Globals::j1_vrx_pin;
 using Globals::j1_vry_pin;
 using Globals::j1_sw_pin;
 
+// lcd
+using Globals::lcd;
+
 // mpu-6050
 using Globals::mpu_addr;
 using Globals::pwr_mgmt_1;
@@ -49,6 +52,7 @@ void setup() {
                     j1_vry_pin, INPUT,
                     j1_sw_pin, INPUT_PULLUP);
     config_mpu_6050(mpu_addr, pwr_mgmt_1, start_data_addr);
+    config_display(lcd);
     config_rot_encoder();
     
     Serial.println("Initialization complete!\n\n");
@@ -75,8 +79,9 @@ void loop() {
 //    Serial.println(data_pkg.mpu.down());
 //    Serial.print("mpu up: ");
 //    Serial.println(data_pkg.mpu.up());
-    Serial.print("mpu temp: ");
-    Serial.println(data_pkg.mpu.temp());
-	delay(2000);
-//    process_rot_encoder_isr();
+//    Serial.print("mpu temp: ");
+//    Serial.println(data_pkg.mpu.temp());
+//	delay(2000);
+    //process_rot_encoder_isr();
+    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp());
 }

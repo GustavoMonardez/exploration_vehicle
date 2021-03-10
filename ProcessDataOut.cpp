@@ -8,6 +8,7 @@
  */
 #include "ProcessDataOut.h"     // func prototypes
 #include "wiring_private.h"     // analog read
+#include "RotaryEncoder.h"
 #include <Wire.h>               // mpu-6050
 
 // helper functions prototypes
@@ -195,6 +196,110 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
     * Page 30 of MPU-6000-Register-Map1.pdf
     */
     mpu.temp(raw_temp/340.00+36.53);
+}
+
+/*********************************************************************
+* @fn                - process_display
+*
+* @brief             - process input data from display unit
+*
+* @param[in]         - Disolay object
+* 
+* @return            - none
+*
+* @Note              - none
+*********************************************************************/
+void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp) {
+    char header[16];
+    sprintf(header,"EXP. VEHICLE %dC", temp);
+    lcd.setCursor(0, 0);
+    lcd.print(header);
+
+    // arrow
+    lcd.setCursor(0, 1);
+    lcd.write(0);
+    
+    if (virtual_pos != last_pos) {
+        // default - page 1
+        if (virtual_pos == 0) {
+            lcd.clear();
+//            lcd.setCursor(0, 1);
+//            lcd.write(0);
+//            lcd.setCursor(0, 0);
+//            lcd.print(header);
+            lcd.setCursor(2, 1);
+            lcd.print("LIGHTS ON/OFF");
+            //Serial.print("sw_state: "); Serial.println(digitalRead(re_sw_pin));
+            // send command to turn on lights 
+//            enc_sw_val = GlobalConfig::DisplayCodes::lights;
+//            if ((!digitalRead(re_sw_pin))) {
+//                //GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::lights;
+//                while (!digitalRead(re_sw_pin)) {
+//                  delay(10);
+//                }
+//                lcd.clear();
+//                lcd.setCursor(2, 1);
+//                lcd.print("ON");
+//                Serial.println("pressed");
+//            }
+        }
+        else if (virtual_pos == 1) {
+            lcd.clear();
+//            lcd.setCursor(0, 0);
+//            lcd.write(0);
+//            lcd.setCursor(2, 0);
+//            lcd.print("AUTO MODE");
+            lcd.setCursor(2, 1);
+            lcd.print("AUTO MODE");
+
+            // send command to switch to autonomous mode
+//                enc_sw_val = GlobalConfig::DisplayCodes::auto_mode;
+//                if ((!digitalRead(GlobalConfig::re_sw_pin))) {
+//                    GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::auto_mode;
+//                    while (!digitalRead(GlobalConfig::re_sw_pin)) {
+//                      delay(10);
+//                    }
+//                }
+        }
+
+        else if (virtual_pos == 2) {
+            lcd.clear();
+//            lcd.setCursor(0, 1);
+//            lcd.write(0);
+//            lcd.setCursor(2, 0);
+//            lcd.print("AUTO MODE");
+            lcd.setCursor(2, 1);
+            lcd.print("RETURN HOME");
+
+            // send command to return vechicle to starting point
+//            enc_sw_val = GlobalConfig::DisplayCodes::ret_home;
+//                if ((!digitalRead(GlobalConfig::re_sw_pin))) {
+//                    GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::ret_home;
+//                    while (!digitalRead(GlobalConfig::re_sw_pin)) {
+//                      delay(10);
+//                    }
+//                }
+        }
+        Serial.print(virtual_pos > last_pos ? "Up  :" : "Down:");
+        Serial.println(virtual_pos);
+        // Keep track of this new value
+        last_pos = virtual_pos ;
+    }
+    if ((!digitalRead(re_sw_pin))) {
+        //GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::lights;
+        while (!digitalRead(re_sw_pin)) {
+          delay(10);
+        }
+        if (virtual_pos == 0) {
+            lcd.clear();
+            lcd.setCursor(2, 1);
+            lcd.print("ON");
+        } else if (virtual_pos == 1) {
+            lcd.clear();
+            lcd.setCursor(2, 1);
+            lcd.print("OFF");
+        }
+    }
 }
 
 /*********************************************************************
