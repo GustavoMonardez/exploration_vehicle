@@ -67,14 +67,16 @@ void loop() {
 //    Serial.print("up: ");
 //    Serial.println(data_pkg.j1.up);
     process_mpu_6050(data_pkg.mpu);
-    Serial.print("mpu left: ");
-    Serial.println(data_pkg.mpu.left());
-    Serial.print("mpu right: ");
-    Serial.println(data_pkg.mpu.right());
-    Serial.print("mpu down: ");
-    Serial.println(data_pkg.mpu.down());
-    Serial.print("mpu up: ");
-    Serial.println(data_pkg.mpu.up());
+//    Serial.print("mpu left: ");
+//    Serial.println(data_pkg.mpu.left());
+//    Serial.print("mpu right: ");
+//    Serial.println(data_pkg.mpu.right());
+//    Serial.print("mpu down: ");
+//    Serial.println(data_pkg.mpu.down());
+//    Serial.print("mpu up: ");
+//    Serial.println(data_pkg.mpu.up());
+    Serial.print("mpu temp: ");
+    Serial.println(data_pkg.mpu.temp());
 	delay(2000);
 //    process_rot_encoder_isr();
 }

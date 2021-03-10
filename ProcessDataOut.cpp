@@ -187,6 +187,14 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
         mpu.up(calib_y_acc);
         mpu.down(0);
     }
+
+    /* The temperature in degrees C for a given register value may be 
+    * computed as:
+    * Temperature in degrees 
+    * C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53
+    * Page 30 of MPU-6000-Register-Map1.pdf
+    */
+    mpu.temp(raw_temp/340.00+36.53);
 }
 
 /*********************************************************************
