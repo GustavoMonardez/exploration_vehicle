@@ -17,8 +17,10 @@ void read_mpu_6050_data();
 int16_t get_calibrated_x_acc();
 int16_t get_calibrated_y_acc();
 void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
-                         char menu_items[num_of_items][item_size], 
-                         uint8_t arrow_pos, uint8_t item_col = 2);
+                         char menu_items[max_menu_items][max_chars_per_row], 
+                         uint8_t arrow_pos, 
+                         uint8_t item_row,
+                         uint8_t item_col = 2);
 
 // mpu-6050 raw data variables
 int16_t raw_x_acc;
@@ -42,6 +44,8 @@ int16_t calib_z_gyro;
 const int16_t pwm_x_val = 255;
 const int16_t pwm_y_val = 255;
 
+// display unit variables
+uint8_t selected_menu = 0;
  
 /*********************************************************************
 * @fn                - process_joystick
@@ -207,7 +211,10 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
 *
 * @brief             - process input data from display unit
 *
-* @param[in]         - Disolay object
+* @param[in]         - Display object
+* @param[in]         - menu selection to be updated
+* @param[in]         - current internal temperature
+* @param[in]         - bool that indicates if first time running
 * 
 * @return            - none
 *
@@ -216,6 +223,7 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
 void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, bool& init_boot) {
     // header buffer
     char header[16];
+    char header_veh_data_page[2][16];
     
     // update temp on initial boot up
     if (init_boot) {
@@ -225,14 +233,19 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
         strcpy(header_veh_data_page[0], header);
         strcpy(header_veh_data_page[1], "DISP VEH DATA");
         
-        draw_main_menu_page(lcd, header_veh_data_page, 1, 0);
+        draw_main_menu_page(lcd, header_veh_data_page, 1, 0, 0);
+        
+        // save curr menu we are on
+        selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
         init_boot = false;
     }
+
+    //normalize values
+    virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
+    virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
+    
     // main menu items
     if (main_menu_item) {
-        //normalize values
-        virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
-        virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
         // only update menus if a change has been detected
         if (virtual_pos != last_pos) {
             // DISP VEH DATA
@@ -243,26 +256,46 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
                 strcpy(header_veh_data_page[0], header);
                 strcpy(header_veh_data_page[1], "DISP VEH DATA");
                 
-                draw_main_menu_page(lcd, header_veh_data_page, 1, 0);
+                draw_main_menu_page(lcd, header_veh_data_page, 1, 0, 0);
+
+                // save curr menu we are on
+                selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
             }
             // OP MODE
             else if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
-                draw_main_menu_page(lcd, op_mode_lights_page, 0);
+                draw_main_menu_page(lcd, main_menus, 0, 0, 2);
+                // save curr menu we are on
+                selected_menu = static_cast<uint8_t>(Menus::OPERATION_MODE);
             }
             // VEH LIGHTS
             else if (virtual_pos == static_cast<int>(Menus::LIGHTS)) {
-                draw_main_menu_page(lcd, op_mode_lights_page, 1);
+                draw_main_menu_page(lcd, main_menus, 1, 0, 2);
+                // save curr menu we are on
+                selected_menu = static_cast<uint8_t>(Menus::LIGHTS);
             }
             // RET HOME
             else if (virtual_pos == static_cast<int>(Menus::RETURN_HOME)) {
-                draw_main_menu_page(lcd, ret_home_page, 0);
+                draw_main_menu_page(lcd, main_menus, 0, 2, 2);
+                // save curr menu we are on
+                selected_menu = static_cast<uint8_t>(Menus::RETURN_HOME);
             }
             last_pos = virtual_pos ;
         }
     }
     // submenus
     else {
-        
+        // resets virtual_pos to 0
+        virtual_pos = virtual_pos - selected_menu;
+
+        if (virtual_pos != last_pos) {
+            // vehicle data submenu
+            if (selected_menu == 0) {
+                if (virtual_pos == static_cast<int>(VehicleData::DISP_VEH_DATA)) {
+                    
+                }
+            }
+            last_pos = virtual_pos ;
+        }
     }
 }
 
@@ -344,10 +377,10 @@ int16_t get_calibrated_y_acc() {
     return map(raw_y_acc, Mpu6050::min_y_acc(), (sign*Mpu6050::upper_boundary()), 0, (sign*pwm_y_val)); 
 }
 
-
 void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
-                         char menu_items[num_of_items][item_size], 
+                         char menu_items[max_menu_items][max_chars_per_row], 
                          uint8_t arrow_pos, 
+                         uint8_t item_row,
                          uint8_t item_col = 2) {
     // clear the screen
     lcd.clear();
@@ -358,9 +391,9 @@ void draw_main_menu_page(LiquidCrystal_I2C& lcd,
     
     // item 1
     lcd.setCursor(item_col, 0);
-    lcd.print(menu_items[0]);
+    lcd.print(menu_items[item_row]);
     
     // item 2
     lcd.setCursor(2, 1);
-    lcd.print(menu_items[1]);
+    lcd.print(menu_items[item_row+1]);
 }

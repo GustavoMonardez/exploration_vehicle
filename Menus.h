@@ -1,14 +1,13 @@
-const int num_of_items = 2; // number of rows
-const int item_size = 16;   // max number of characters per row
+const int max_menu_items = 3;       // number of rows
+const int max_chars_per_row = 16;   // number of cols
 
 /*Note: the rotary encoder can generate values beyond the 
 number of menu items */
 const int min_menu_val = 0; // lower boundary
 const int max_menu_val = 3; // upper boundary
 
-extern char header_veh_data_page[num_of_items][item_size];
-extern char op_mode_lights_page[num_of_items][item_size];
-extern char ret_home_page[num_of_items][item_size];
+// menu items matrix
+extern char main_menus[max_menu_items][max_chars_per_row];
 
 // it helps with menu navigation
 enum class Menus {
@@ -16,6 +15,13 @@ enum class Menus {
     OPERATION_MODE,
     LIGHTS,
     RETURN_HOME        
+};
+
+// it helps with menu navigation
+enum class VehicleData {
+    DISP_VEH_DATA,
+    DISP_TX_DATA,
+    CANCEL        
 };
 
 // this helps determine if we are on the main menu
