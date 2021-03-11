@@ -9,12 +9,16 @@
 #include "ProcessDataOut.h"     // func prototypes
 #include "wiring_private.h"     // analog read
 #include "RotaryEncoder.h"
+#include "Menus.h"
 #include <Wire.h>               // mpu-6050
 
 // helper functions prototypes
 void read_mpu_6050_data();
 int16_t get_calibrated_x_acc();
 int16_t get_calibrated_y_acc();
+void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
+                         char menu_items[num_of_items][item_size], 
+                         uint8_t arrow_pos, uint8_t item_col = 2);
 
 // mpu-6050 raw data variables
 int16_t raw_x_acc;
@@ -209,96 +213,56 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
 *
 * @Note              - none
 *********************************************************************/
-void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp) {
+void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, bool& init_boot) {
+    // header buffer
     char header[16];
-    sprintf(header,"EXP. VEHICLE %dC", temp);
-    lcd.setCursor(0, 0);
-    lcd.print(header);
-
-    // arrow
-    lcd.setCursor(0, 1);
-    lcd.write(0);
     
-    if (virtual_pos != last_pos) {
-        // default - page 1
-        if (virtual_pos == 0) {
-            lcd.clear();
-//            lcd.setCursor(0, 1);
-//            lcd.write(0);
-//            lcd.setCursor(0, 0);
-//            lcd.print(header);
-            lcd.setCursor(2, 1);
-            lcd.print("LIGHTS ON/OFF");
-            //Serial.print("sw_state: "); Serial.println(digitalRead(re_sw_pin));
-            // send command to turn on lights 
-//            enc_sw_val = GlobalConfig::DisplayCodes::lights;
-//            if ((!digitalRead(re_sw_pin))) {
-//                //GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::lights;
-//                while (!digitalRead(re_sw_pin)) {
-//                  delay(10);
-//                }
-//                lcd.clear();
-//                lcd.setCursor(2, 1);
-//                lcd.print("ON");
-//                Serial.println("pressed");
-//            }
-        }
-        else if (virtual_pos == 1) {
-            lcd.clear();
-//            lcd.setCursor(0, 0);
-//            lcd.write(0);
-//            lcd.setCursor(2, 0);
-//            lcd.print("AUTO MODE");
-            lcd.setCursor(2, 1);
-            lcd.print("AUTO MODE");
-
-            // send command to switch to autonomous mode
-//                enc_sw_val = GlobalConfig::DisplayCodes::auto_mode;
-//                if ((!digitalRead(GlobalConfig::re_sw_pin))) {
-//                    GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::auto_mode;
-//                    while (!digitalRead(GlobalConfig::re_sw_pin)) {
-//                      delay(10);
-//                    }
-//                }
-        }
-
-        else if (virtual_pos == 2) {
-            lcd.clear();
-//            lcd.setCursor(0, 1);
-//            lcd.write(0);
-//            lcd.setCursor(2, 0);
-//            lcd.print("AUTO MODE");
-            lcd.setCursor(2, 1);
-            lcd.print("RETURN HOME");
-
-            // send command to return vechicle to starting point
-//            enc_sw_val = GlobalConfig::DisplayCodes::ret_home;
-//                if ((!digitalRead(GlobalConfig::re_sw_pin))) {
-//                    GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::ret_home;
-//                    while (!digitalRead(GlobalConfig::re_sw_pin)) {
-//                      delay(10);
-//                    }
-//                }
-        }
-        Serial.print(virtual_pos > last_pos ? "Up  :" : "Down:");
-        Serial.println(virtual_pos);
-        // Keep track of this new value
-        last_pos = virtual_pos ;
+    // update temp on initial boot up
+    if (init_boot) {
+        // header
+        sprintf(header,"EXP. VEHICLE %dC", temp);
+    
+        strcpy(header_veh_data_page[0], header);
+        strcpy(header_veh_data_page[1], "DISP VEH DATA");
+        
+        draw_main_menu_page(lcd, header_veh_data_page, 1, 0);
+        init_boot = false;
     }
-    if ((!digitalRead(re_sw_pin))) {
-        //GlobalConfig::data_pkg.disp_select = GlobalConfig::DisplayCodes::lights;
-        while (!digitalRead(re_sw_pin)) {
-          delay(10);
+    // main menu items
+    if (main_menu_item) {
+        //normalize values
+        virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
+        virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
+        // only update menus if a change has been detected
+        if (virtual_pos != last_pos) {
+            // DISP VEH DATA
+            if (virtual_pos == static_cast<int>(Menus::VEHICLE_DATA)) {
+                // header
+                sprintf(header,"EXP. VEHICLE %dC", temp);
+                
+                strcpy(header_veh_data_page[0], header);
+                strcpy(header_veh_data_page[1], "DISP VEH DATA");
+                
+                draw_main_menu_page(lcd, header_veh_data_page, 1, 0);
+            }
+            // OP MODE
+            else if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
+                draw_main_menu_page(lcd, op_mode_lights_page, 0);
+            }
+            // VEH LIGHTS
+            else if (virtual_pos == static_cast<int>(Menus::LIGHTS)) {
+                draw_main_menu_page(lcd, op_mode_lights_page, 1);
+            }
+            // RET HOME
+            else if (virtual_pos == static_cast<int>(Menus::RETURN_HOME)) {
+                draw_main_menu_page(lcd, ret_home_page, 0);
+            }
+            last_pos = virtual_pos ;
         }
-        if (virtual_pos == 0) {
-            lcd.clear();
-            lcd.setCursor(2, 1);
-            lcd.print("ON");
-        } else if (virtual_pos == 1) {
-            lcd.clear();
-            lcd.setCursor(2, 1);
-            lcd.print("OFF");
-        }
+    }
+    // submenus
+    else {
+        
     }
 }
 
@@ -378,4 +342,25 @@ int16_t get_calibrated_y_acc() {
     *     neutral:    0
     */     
     return map(raw_y_acc, Mpu6050::min_y_acc(), (sign*Mpu6050::upper_boundary()), 0, (sign*pwm_y_val)); 
+}
+
+
+void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
+                         char menu_items[num_of_items][item_size], 
+                         uint8_t arrow_pos, 
+                         uint8_t item_col = 2) {
+    // clear the screen
+    lcd.clear();
+    
+    // arrow
+    lcd.setCursor(0, arrow_pos);
+    lcd.write(0);
+    
+    // item 1
+    lcd.setCursor(item_col, 0);
+    lcd.print(menu_items[0]);
+    
+    // item 2
+    lcd.setCursor(2, 1);
+    lcd.print(menu_items[1]);
 }

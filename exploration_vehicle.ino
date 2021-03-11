@@ -59,6 +59,7 @@ void setup() {
 }
 
 char text[] = "Hello World!";
+bool init_boot = true; // move to globals
 void loop() {
 	//Globals::transmitter.write(&text, sizeof(text));
 //    process_joystick_alt(data_pkg.j1);
@@ -83,5 +84,5 @@ void loop() {
 //    Serial.println(data_pkg.mpu.temp());
 //	delay(2000);
     //process_rot_encoder_isr();
-    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp());
+    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), init_boot);
 }
