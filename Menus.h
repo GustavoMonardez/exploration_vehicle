@@ -1,5 +1,9 @@
-const int max_menu_items = 3;       // number of rows
-const int max_chars_per_row = 16;   // number of cols
+#pragma once
+
+#include <stdint.h>
+
+const uint8_t max_menu_items = 3;       // number of rows
+const uint8_t max_chars_per_row = 16;   // number of cols
 
 /*Note: the rotary encoder can generate values beyond the 
 number of menu items */
@@ -8,6 +12,10 @@ const int max_menu_val = 3; // upper boundary
 
 // menu items matrix
 extern char main_menus[max_menu_items][max_chars_per_row];
+
+// veh/tx data disp submenu
+const uint8_t veh_tx_max_items = 3;
+extern char veh_tx_submenu[veh_tx_max_items][max_chars_per_row];
 
 // it helps with menu navigation
 enum class Menus {
@@ -19,8 +27,8 @@ enum class Menus {
 
 // it helps with menu navigation
 enum class VehicleData {
-    DISP_VEH_DATA,
     DISP_TX_DATA,
+    DISP_VEH_DATA,
     CANCEL        
 };
 

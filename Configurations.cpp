@@ -99,6 +99,7 @@ void config_display(LiquidCrystal_I2C& lcd) {
 	lcd.init();
 	lcd.backlight();
 	lcd.createChar(0, select_arrow);
+    lcd.createChar(1, back_arrow);
 	lcd.clear();
 	lcd.setCursor(0, 1);
 	lcd.write(0);
