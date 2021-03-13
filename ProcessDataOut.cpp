@@ -16,6 +16,17 @@
 void read_mpu_6050_data();
 int16_t get_calibrated_x_acc();
 int16_t get_calibrated_y_acc();
+void draw_menu_page(LiquidCrystal_I2C& lcd, char menu[][16],
+                         int8_t start_item,
+                         int8_t selector_id,
+                         int8_t selector_row,
+                         int8_t custom_char_1_id = -1,
+                         int8_t custom_char_2_id = -1,
+                         int8_t custom_char_3_id = -1,
+                         int8_t custom_char_4_id = -1,
+                         int8_t custom_char_5_id = -1,
+                         int8_t custom_char_6_id = -1);
+                         
 void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
                          char menu_items[max_menu_items][max_chars_per_row], 
                          uint8_t sym_id,
@@ -47,7 +58,19 @@ const int16_t pwm_y_val = 255;
 
 // display unit variables
 uint8_t selected_menu = 0;
- 
+uint8_t selected_submenu = 0;
+
+enum Symbols : uint8_t {
+    SELECT_ARROW,
+    BACK_ARROW,
+    THERMOMETER,
+    BATTERY,
+    DOT,
+    PERCENT,
+    SUN,
+    BLANK  
+};
+
 /*********************************************************************
 * @fn                - process_joystick
 *
@@ -224,6 +247,59 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
 bool first_time_submenu = true;
 bool first_time_menu = true;
 
+void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, char data_in[32]) {
+    //normalize values
+    virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
+    virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
+    // if (main_menu_item) {
+    // if user has turn knob on rot enc, or it's the first time
+    // booting up
+    if (virtual_pos != last_pos || first_time_menu) {
+        first_time_menu = false;
+        char curr_page[2][16];
+        /********************************* page 1 *********************************/
+        if (virtual_pos == 0) {
+            sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
+            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[0], data_in[1]);        
+            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 0,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                
+        } else if (virtual_pos == 1) {
+            sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
+            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[0], data_in[1]);
+            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 1,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                
+        } 
+        /********************************* page 2 *********************************/
+        else if (virtual_pos == 2) {
+            sprintf(curr_page[0], "VEH:  %dC   %d", data_in[2], data_in[3]);
+            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[4], data_in[5]);
+            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 0,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                
+        } else if (virtual_pos == 3) {
+            sprintf(curr_page[0], "VEH:  %dC   %d", data_in[2], data_in[3]);
+            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[4], data_in[5]);
+            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 1,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                
+        } 
+        /********************************* page 3 *********************************/
+        else if (virtual_pos == 4) {
+            sprintf(curr_page[0], "COMMANDS");
+            sprintf(curr_page[1], "");
+            draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);                
+        }
+        
+        last_pos = virtual_pos ;
+    }
+}
+
 void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, bool& init_boot) {
     // header buffer
     char header[16];
@@ -292,23 +368,38 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
     else {
         // resets virtual_pos to 0
         virtual_pos = virtual_pos - selected_menu;
-        // TODO fix boundary on rot enc for submenus
+
+        // curr submenu
+        selected_submenu = selected_menu;
+        
         if (virtual_pos != last_pos || first_time_submenu) {
             first_time_menu = true;
             first_time_submenu = false;
                         
             // vehicle data submenu
-            if (selected_menu == 0) {
-                // update upper boundary for current submenu
+            if (selected_submenu == 0) {
+                // TODO fix hardcoded value | update upper boundary for current submenu
                 virtual_pos = (virtual_pos > 2) ? 2 : virtual_pos;
                 if (virtual_pos == static_cast<int>(VehicleData::DISP_TX_DATA)) {
                     draw_main_menu_page(lcd, veh_tx_submenu, 0, 0, 0, 2);
                 } else if (virtual_pos == static_cast<int>(VehicleData::DISP_VEH_DATA)) {
                     draw_main_menu_page(lcd, veh_tx_submenu, 0, 1, 0, 2);
+                    selected_submenu = 10;
                 } else if (virtual_pos == static_cast<int>(VehicleData::CANCEL)) {
                     draw_main_menu_page(lcd, veh_tx_submenu, 1, 0, 2, 2);
                 }
             }
+// this will get messy with the virtual pos value
+// a submenu of a submenu?...nah..there's a better way      
+// maybe a third category: main_menu, submenu, and display_page
+//            else if (selected_submenu == 10) {
+//                char veh_data[3][16] = {
+//                    {"T: 30C | H: 76"},
+//                    {"W: 3IN | L: DARK"},
+//                    {"GO BACK"}
+//                };
+//                draw_main_menu_page(lcd, veh_data, 0, 0, 0, 2);
+//            }
             last_pos = virtual_pos ;
         }
     }
@@ -404,7 +495,70 @@ int16_t get_calibrated_y_acc() {
     */     
     return map(raw_y_acc, Mpu6050::min_y_acc(), (sign*Mpu6050::upper_boundary()), 0, (sign*pwm_y_val)); 
 }
-// funct signature: lcd, menu, symbos_pos, symbol_id, item_row, item_col
+
+void draw_menu_page(LiquidCrystal_I2C& lcd, char menu[][16],
+                         int8_t start_item,
+                         int8_t selector_id,
+                         int8_t selector_row,
+                         int8_t custom_char_1_id = -1,
+                         int8_t custom_char_2_id = -1,
+                         int8_t custom_char_3_id = -1,
+                         int8_t custom_char_4_id = -1,
+                         int8_t custom_char_5_id = -1,
+                         int8_t custom_char_6_id = -1) {
+    // clear the screen
+    lcd.clear();
+
+    // row indicator/select arrow
+    lcd.setCursor(0, selector_row);
+    lcd.write(selector_id);
+    
+    // item 1
+    lcd.setCursor(1, 0);
+    lcd.print(menu[start_item]);
+
+    // custom character 1 item 1
+    if (custom_char_1_id != -1) {
+        lcd.setCursor(6, 0);
+        lcd.write(custom_char_1_id);
+    }
+    
+    // custom character 2 item 1
+    if (custom_char_2_id != -1) {
+        lcd.setCursor(12, 0);
+        lcd.write(custom_char_2_id);
+    }
+    
+    // custom character 3 item 1
+    if (custom_char_3_id != -1) {
+        lcd.setCursor(15, 0);
+        lcd.write(custom_char_3_id);
+    }
+    
+    // item 2
+    if (start_item+1 < max_menu_items) {
+        lcd.setCursor(1, 1);
+        lcd.print(menu[start_item+1]);
+    }      
+          
+    // custom character 1 item 2
+    if (custom_char_4_id != -1) {
+        lcd.setCursor(6, 1);
+        lcd.write(custom_char_4_id);
+    }
+    
+    // custom character 2 item 2
+    if (custom_char_5_id != -1) {
+        lcd.setCursor(12, 1);
+        lcd.write(custom_char_5_id);
+    }
+    Serial.print("custom_char_6_id: "); Serial.println(custom_char_6_id);
+    // custom character 3 item 2
+    if (custom_char_6_id != -1) {
+        lcd.setCursor(15, 1);
+        lcd.write(custom_char_6_id);   
+    }
+}
 void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
                          char menu_items[max_menu_items][max_chars_per_row], 
                          uint8_t sym_id,
@@ -424,7 +578,7 @@ void draw_main_menu_page(LiquidCrystal_I2C& lcd,
     
     // item 2
     if (item_row+1 < max_menu_items) {
-        lcd.setCursor(2, 1);
+        lcd.setCursor(item_col, 1);
         lcd.print(menu_items[item_row+1]);
     }
 }

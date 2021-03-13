@@ -100,6 +100,12 @@ void config_display(LiquidCrystal_I2C& lcd) {
 	lcd.backlight();
 	lcd.createChar(0, select_arrow);
     lcd.createChar(1, back_arrow);
+    lcd.createChar(2, thermometer);
+    lcd.createChar(3, battery);
+    lcd.createChar(4, dot);
+    lcd.createChar(5, percent);
+    lcd.createChar(6, sun);
+    lcd.createChar(7, blank);
 	lcd.clear();
 	lcd.setCursor(0, 1);
 	lcd.write(0);

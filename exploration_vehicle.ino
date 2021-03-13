@@ -42,6 +42,17 @@ using Globals::mpu_addr;
 using Globals::pwr_mgmt_1;
 using Globals::start_data_addr;
 
+/*TEST remove*/
+//struct DataIn {
+//    int8_t temp;
+//    uint8_t bat;
+//    uint8_t hum;
+//    uint8_t water;
+//    uint8_t light;
+//    uint8_t dist;
+//    uint8_t acc;       
+//};
+int8_t data_in[32];
 void setup() {
     Serial.begin(9600);
     Serial.println("Initialization started...");
@@ -56,10 +67,19 @@ void setup() {
     config_rot_encoder();
     
     Serial.println("Initialization complete!\n\n");
+    /*TEST remove*/
+    /*temp*/data_in[0] = 37;
+    /*bat*/data_in[1] = 52;
+    /*hum*/data_in[2] = 72;
+    /*water*/data_in[3] = 21;
+    /*light*/data_in[4] = 90;
+    /*dist*/data_in[5] = 60;
+    /*acc*/data_in[6] = 15;
 }
 
 char text[] = "Hello World!";
-bool init_boot = true; // move to globals
+bool init_boot = true; // move to globals or remove
+
 void loop() {
 	//Globals::transmitter.write(&text, sizeof(text));
 //    process_joystick_alt(data_pkg.j1);
@@ -83,6 +103,7 @@ void loop() {
 //    Serial.print("mpu temp: ");
 //    Serial.println(data_pkg.mpu.temp());
 //	delay(2000);
+    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), data_in);
     //process_rot_encoder_isr();
-    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), init_boot);
+    //process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), init_boot);
 }

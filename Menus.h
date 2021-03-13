@@ -8,7 +8,7 @@ const uint8_t max_chars_per_row = 16;   // number of cols
 /*Note: the rotary encoder can generate values beyond the 
 number of menu items */
 const int min_menu_val = 0; // lower boundary
-const int max_menu_val = 3; // upper boundary
+const int max_menu_val = 4; // upper boundary
 
 // menu items matrix
 extern char main_menus[max_menu_items][max_chars_per_row];
