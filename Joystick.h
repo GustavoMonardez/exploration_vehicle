@@ -1,3 +1,11 @@
+/**
+ * @file Joystick.h
+ *
+ * @brief Joystick data delaration
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 #include <stdint.h>

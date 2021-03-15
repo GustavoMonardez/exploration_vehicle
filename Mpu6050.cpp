@@ -1,3 +1,11 @@
+/**
+ * @file Mpu6050.cpp
+ *
+ * @brief Mpu6050 api and data class definition
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #include "Mpu6050.h"
 
 namespace Mpu6050 {

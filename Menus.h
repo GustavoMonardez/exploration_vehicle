@@ -1,3 +1,11 @@
+/**
+ * @file Menus.h
+ *
+ * @brief Menu constants and declarations
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 #include <stdint.h>

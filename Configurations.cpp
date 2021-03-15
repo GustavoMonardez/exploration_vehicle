@@ -1,7 +1,7 @@
 /**
  * @file Configurations.cpp
  *
- * @brief Configuration functions implementation
+ * @brief Configuration functions definitions
  *
  * @author Gustavo Monardez
  *

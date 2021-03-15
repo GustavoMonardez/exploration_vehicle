@@ -1,7 +1,9 @@
 /*
-* Exploration Vehicle
-* Transmitter Code
-* Author: Gustavo Monardez
+* @file exploration_vehicle.cpp
+* 
+* @brief transmitter main entry point
+* 
+* @author: Gustavo Monardez
 *
 * D13   - SCLK                          D12   - MISO
 * A0    - J1_X                          D11   - MOSI

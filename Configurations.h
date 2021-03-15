@@ -1,3 +1,11 @@
+/**
+ * @file Configurations.h
+ *
+ * @brief Configuration functions declarations
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 #include <LiquidCrystal_I2C.h>

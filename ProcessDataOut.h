@@ -1,3 +1,11 @@
+/**
+ * @file ProcessDataOut.h
+ *
+ * @brief Process user input function declarations
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 #include <LiquidCrystal_I2C.h>

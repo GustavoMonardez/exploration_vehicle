@@ -1,10 +1,13 @@
+/**
+ * @file Globals.h
+ *
+ * @brief Global variables and constants
+ *
+ * @author Gustavo Monardez
+ *
+ */
+
 #pragma once
-/*
-* File:		Globals.h
-* Project:	Exploration Vehicle
-* Author:	Gustavo Monardez
-* Date: 	02/26/2021
-*/
 
 #include <LiquidCrystal_I2C.h>
 #include <RF24.h>

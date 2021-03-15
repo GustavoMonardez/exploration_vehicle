@@ -1,3 +1,12 @@
+/**
+ * @file RotaryEncoder.h
+ *
+ * @brief Encoder pins, data processing variables,
+ *        and utility functions
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 #include <stdint.h>

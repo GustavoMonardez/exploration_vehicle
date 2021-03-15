@@ -1,3 +1,11 @@
+/**
+ * @file LcdCustomCharacters.h
+ *
+ * @brief Display custom characters
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 uint8_t select_arrow[8] = {

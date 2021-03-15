@@ -1,3 +1,11 @@
+/**
+ * @file Mpu6050.h
+ *
+ * @brief Mpu6050 api and data class declaration
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #pragma once
 
 #include <stdint.h>

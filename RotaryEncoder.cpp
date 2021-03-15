@@ -1,3 +1,12 @@
+/**
+ * @file RotaryEncoder.cpp
+ *
+ * @brief Data processing variables initialization,
+ *        and utility functions implementations.
+ *
+ * @author Gustavo Monardez
+ *
+ */
 #include "RotaryEncoder.h"
 #include "Arduino.h"
 
