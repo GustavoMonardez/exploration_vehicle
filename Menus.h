@@ -26,13 +26,38 @@ const uint8_t veh_tx_max_items = 3;
 extern char veh_tx_submenu[veh_tx_max_items][max_chars_per_row];
 
 // it helps with menu navigation
-enum class Menus {
-    VEHICLE_DATA,
-    OPERATION_MODE,
-    LIGHTS,
-    RETURN_HOME        
+enum class ActiveMenu {
+    MAIN_MENU,
+    COMMANDS,
+    OP_MODE,
+    RET_HOME,
+    LIGHTS  
 };
 
+enum class Menus {
+    OPERATION_MODE,
+    RETURN_HOME ,
+    LIGHTS,
+    CANCEL       
+};
+
+enum class OperationMode {
+    MANUAL,
+    AUTO,
+    CANCEL  
+};
+
+enum class ReturnHome {
+    CONFIRM,
+    CANCEL  
+};
+
+enum class Lights {
+    ON,
+    OFF,
+    AUTO,
+    BACK  
+};
 // it helps with menu navigation
 enum class VehicleData {
     DISP_TX_DATA,

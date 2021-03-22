@@ -244,59 +244,135 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
 *
 * @Note              - none
 *********************************************************************/
+bool first_time_submenu_options = true;
 bool first_time_submenu = true;
 bool first_time_menu = true;
+uint8_t curr_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
 
 void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, char data_in[32]) {
     //normalize values
     virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
     virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
-    // if (main_menu_item) {
-    // if user has turn knob on rot enc, or it's the first time
-    // booting up
-    if (virtual_pos != last_pos || first_time_menu) {
-        first_time_menu = false;
-        char curr_page[2][16];
-        /********************************* page 1 *********************************/
-        if (virtual_pos == 0) {
-            sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
-            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[0], data_in[1]);        
-            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 0,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
-                
-        } else if (virtual_pos == 1) {
-            sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
-            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[0], data_in[1]);
-            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 1,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
-                
-        } 
-        /********************************* page 2 *********************************/
-        else if (virtual_pos == 2) {
-            sprintf(curr_page[0], "VEH:  %dC   %d", data_in[2], data_in[3]);
-            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[4], data_in[5]);
-            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 0,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
-                
-        } else if (virtual_pos == 3) {
-            sprintf(curr_page[0], "VEH:  %dC   %d", data_in[2], data_in[3]);
-            sprintf(curr_page[1], "VEH:  %dC   %d", data_in[4], data_in[5]);
-            draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 1,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
-                Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
-                
-        } 
-        /********************************* page 3 *********************************/
-        else if (virtual_pos == 4) {
-            sprintf(curr_page[0], "COMMANDS");
-            sprintf(curr_page[1], "");
-            draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);                
-        }
+
+    char curr_page[2][16];
+
+    // main menu
+    if (curr_menu == static_cast<uint8_t>(ActiveMenu::MAIN_MENU)) {
         
-        last_pos = virtual_pos ;
+        // if user has turn knob on rot enc, or it's
+        // the first time booting up
+        if (virtual_pos != last_pos || first_time_menu) {
+            first_time_menu = false;
+            first_time_submenu = true;
+            first_time_submenu_options = true;
+            /********************************* page 1 *********************************/
+            if (virtual_pos == 0) {
+                sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
+                sprintf(curr_page[1], "VEH:  %dC   %d", data_in[0], data_in[1]);        
+                draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 0,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                    
+            } else if (virtual_pos == 1) {
+                sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
+                sprintf(curr_page[1], "VEH:  %dC   %d", data_in[0], data_in[1]);
+                draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 1,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                    
+            } 
+            /********************************* page 2 *********************************/
+            else if (virtual_pos == 2) {
+                sprintf(curr_page[0], "VEH:  %dC   %d", data_in[2], data_in[3]);
+                sprintf(curr_page[1], "VEH:  %dC   %d", data_in[4], data_in[5]);
+                draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 0,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                    
+            } else if (virtual_pos == 3) {
+                sprintf(curr_page[0], "VEH:  %dC   %d", data_in[2], data_in[3]);
+                sprintf(curr_page[1], "VEH:  %dC   %d", data_in[4], data_in[5]);
+                draw_menu_page(lcd, curr_page, 0, Symbols::DOT, 1,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT,
+                    Symbols::THERMOMETER, Symbols::BATTERY, Symbols::PERCENT);
+                    
+            } 
+            /********************************* page 3 *********************************/
+            else if (virtual_pos == 4) {
+                sprintf(curr_page[0], "COMMANDS");
+                sprintf(curr_page[1], "");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS);                
+            }
+            last_pos = virtual_pos ;
+        }
+
+    }
+    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::COMMANDS)) {
+        if (virtual_pos != last_pos || first_time_submenu) {
+            first_time_menu = true;
+            first_time_submenu = false;
+            first_time_submenu_options = true;
+           
+            if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
+                sprintf(curr_page[0], "OPERATION MODE");
+                sprintf(curr_page[1], "RETURN HOME");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::OP_MODE);
+            } else if (virtual_pos == static_cast<int>(Menus::RETURN_HOME)) {
+                sprintf(curr_page[0], "OPERATION MODE");
+                sprintf(curr_page[1], "RETURN HOME");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
+            } else if (virtual_pos == static_cast<int>(Menus::LIGHTS)) {
+                sprintf(curr_page[0], "LIGHTS");
+                sprintf(curr_page[1], "BACK");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+            } else if (virtual_pos == static_cast<int>(Menus::CANCEL)) {
+                sprintf(curr_page[0], "LIGHTS");
+                sprintf(curr_page[1], "BACK");
+                draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 1);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
+            }
+            last_pos = virtual_pos ;
+        }
+    }
+    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::OP_MODE)) {
+        if (virtual_pos != last_pos || first_time_submenu_options) {
+            first_time_menu = true;
+            first_time_submenu = true;
+            first_time_submenu_options = false;
+
+            if (virtual_pos == static_cast<int>(OperationMode::MANUAL)) {
+                sprintf(curr_page[0], "MANUAL");
+                sprintf(curr_page[1], "AUTO");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+            } else if (virtual_pos == static_cast<int>(OperationMode::AUTO)) {
+                sprintf(curr_page[0], "MANUAL");
+                sprintf(curr_page[1], "AUTO");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
+            } else if (virtual_pos == static_cast<int>(OperationMode::CANCEL)) {
+                sprintf(curr_page[0], "BACK");
+                sprintf(curr_page[1], "");
+                draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 0);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS); 
+            }
+            last_pos = virtual_pos ;
+        }
+    }
+    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::RET_HOME)) {
+        
+    }
+    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::LIGHTS)) {
+        
+    }
+
+    // option selected
+    if ((!digitalRead(re_sw_pin))) {
+        curr_menu = selected_menu;
+        virtual_pos = 0;
+        while (!digitalRead(re_sw_pin)) {
+          delay(10);
+        }
     }
 }
 
@@ -316,7 +392,7 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
         draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
         
         // save curr menu we are on
-        selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
+        //selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
         init_boot = false;
     }
 
@@ -331,20 +407,20 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
             first_time_menu = false;
             first_time_submenu = true;
             // DISP VEH DATA
-            if (virtual_pos == static_cast<int>(Menus::VEHICLE_DATA)) {
-                // header
-                sprintf(header,"EXP. VEHICLE %dC", temp);
-                
-                strcpy(header_veh_data_page[0], header);
-                strcpy(header_veh_data_page[1], "DISP VEH DATA");
-                
-                draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
-
-                // save curr menu we are on
-                selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
-            }
+//            if (virtual_pos == static_cast<int>(Menus::VEHICLE_DATA)) {
+//                // header
+//                sprintf(header,"EXP. VEHICLE %dC", temp);
+//                
+//                strcpy(header_veh_data_page[0], header);
+//                strcpy(header_veh_data_page[1], "DISP VEH DATA");
+//                
+//                draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
+//
+//                // save curr menu we are on
+//                //selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
+//            }
             // OP MODE
-            else if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
+            /*else*/ if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
                 draw_main_menu_page(lcd, main_menus, 0, 0, 0, 2);
                 // save curr menu we are on
                 selected_menu = static_cast<uint8_t>(Menus::OPERATION_MODE);
