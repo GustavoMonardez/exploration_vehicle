@@ -27,12 +27,12 @@ void draw_menu_page(LiquidCrystal_I2C& lcd, char menu[][16],
                          int8_t custom_char_5_id = -1,
                          int8_t custom_char_6_id = -1);
                          
-void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
-                         char menu_items[max_menu_items][max_chars_per_row], 
-                         uint8_t sym_id,
-                         uint8_t sym_pos, 
-                         uint8_t item_row,
-                         uint8_t item_col = 2);
+//void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
+//                         char menu_items[max_menu_items][max_chars_per_row], 
+//                         uint8_t sym_id,
+//                         uint8_t sym_pos, 
+//                         uint8_t item_row,
+//                         uint8_t item_col = 2);
 
 // mpu-6050 raw data variables
 int16_t raw_x_acc;
@@ -250,10 +250,10 @@ bool first_time_menu = true;
 uint8_t curr_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
 
 void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, char data_in[32]) {
-    //normalize values
-    virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
-    virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
+    //normalize min value
+    virtual_pos = (virtual_pos < 0) ? 0 : virtual_pos;
 
+    // current page buffer
     char curr_page[2][16];
 
     // main menu
@@ -262,9 +262,14 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
         // if user has turn knob on rot enc, or it's
         // the first time booting up
         if (virtual_pos != last_pos || first_time_menu) {
+            // update active menu
             first_time_menu = false;
             first_time_submenu = true;
             first_time_submenu_options = true;
+
+            // normalize max value
+            virtual_pos = (virtual_pos > 4) ? 4 : virtual_pos;
+            
             /********************************* page 1 *********************************/
             if (virtual_pos == 0) {
                 sprintf(curr_page[0], "TX:   %dC   %d", temp, 86);
@@ -310,24 +315,28 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
     }
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::COMMANDS)) {
         if (virtual_pos != last_pos || first_time_submenu) {
+            // update current active menu
             first_time_menu = true;
             first_time_submenu = false;
             first_time_submenu_options = true;
-           
-            if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
+
+            // normalize max value
+            virtual_pos = (virtual_pos > 3) ? 3 : virtual_pos;
+            
+            if (virtual_pos == static_cast<int>(Commands::OPERATION_MODE)) {
                 sprintf(curr_page[0], "OPERATION MODE");
                 sprintf(curr_page[1], "RETURN HOME");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
-                selected_menu = static_cast<uint8_t>(ActiveMenu::OP_MODE);
-            } else if (virtual_pos == static_cast<int>(Menus::RETURN_HOME)) {
+                selected_menu = static_cast<uint8_t>(ActiveMenu::OPERATION_MODE);
+            } else if (virtual_pos == static_cast<int>(Commands::RETURN_HOME)) {
                 sprintf(curr_page[0], "OPERATION MODE");
                 sprintf(curr_page[1], "RETURN HOME");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
-            } else if (virtual_pos == static_cast<int>(Menus::LIGHTS)) {
+            } else if (virtual_pos == static_cast<int>(Commands::LIGHTS)) {
                 sprintf(curr_page[0], "LIGHTS");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
-            } else if (virtual_pos == static_cast<int>(Menus::CANCEL)) {
+            } else if (virtual_pos == static_cast<int>(Commands::CANCEL)) {
                 sprintf(curr_page[0], "LIGHTS");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 1);
@@ -336,11 +345,15 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
             last_pos = virtual_pos ;
         }
     }
-    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::OP_MODE)) {
+    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::OPERATION_MODE)) {
         if (virtual_pos != last_pos || first_time_submenu_options) {
+            // update current active menu
             first_time_menu = true;
             first_time_submenu = true;
             first_time_submenu_options = false;
+
+            // normalize max value
+            virtual_pos = (virtual_pos > 2) ? 2 : virtual_pos;
 
             if (virtual_pos == static_cast<int>(OperationMode::MANUAL)) {
                 sprintf(curr_page[0], "MANUAL");
@@ -359,7 +372,7 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
             last_pos = virtual_pos ;
         }
     }
-    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::RET_HOME)) {
+    else if (curr_menu == static_cast<uint8_t>(ActiveMenu::RETURN_HOME)) {
         
     }
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::LIGHTS)) {
@@ -376,123 +389,123 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
     }
 }
 
-void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, bool& init_boot) {
-    // header buffer
-    char header[16];
-    char header_veh_data_page[2][16];
-    
-    // update temp on initial boot up
-    if (init_boot) {
-        // header
-        sprintf(header,"EXP. VEHICLE %dC", temp);
-    
-        strcpy(header_veh_data_page[0], header);
-        strcpy(header_veh_data_page[1], "DISP VEH DATA");
-        
-        draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
-        
-        // save curr menu we are on
-        //selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
-        init_boot = false;
-    }
-
-    //normalize values
-    virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
-    virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
-    
-    // main menu items
-    if (main_menu_item) {
-        // only update menus if a change has been detected
-        if (virtual_pos != last_pos || first_time_menu) {
-            first_time_menu = false;
-            first_time_submenu = true;
-            // DISP VEH DATA
-//            if (virtual_pos == static_cast<int>(Menus::VEHICLE_DATA)) {
-//                // header
-//                sprintf(header,"EXP. VEHICLE %dC", temp);
-//                
-//                strcpy(header_veh_data_page[0], header);
-//                strcpy(header_veh_data_page[1], "DISP VEH DATA");
-//                
-//                draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
+//void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, bool& init_boot) {
+//    // header buffer
+//    char header[16];
+//    char header_veh_data_page[2][16];
+//    
+//    // update temp on initial boot up
+//    if (init_boot) {
+//        // header
+//        sprintf(header,"EXP. VEHICLE %dC", temp);
+//    
+//        strcpy(header_veh_data_page[0], header);
+//        strcpy(header_veh_data_page[1], "DISP VEH DATA");
+//        
+//        draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
+//        
+//        // save curr menu we are on
+//        //selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
+//        init_boot = false;
+//    }
 //
+//    //normalize values
+//    virtual_pos = (virtual_pos < min_menu_val) ? min_menu_val : virtual_pos;
+//    virtual_pos = (virtual_pos > max_menu_val) ? max_menu_val : virtual_pos;
+//    
+//    // main menu items
+//    if (main_menu_item) {
+//        // only update menus if a change has been detected
+//        if (virtual_pos != last_pos || first_time_menu) {
+//            first_time_menu = false;
+//            first_time_submenu = true;
+//            // DISP VEH DATA
+////            if (virtual_pos == static_cast<int>(Menus::VEHICLE_DATA)) {
+////                // header
+////                sprintf(header,"EXP. VEHICLE %dC", temp);
+////                
+////                strcpy(header_veh_data_page[0], header);
+////                strcpy(header_veh_data_page[1], "DISP VEH DATA");
+////                
+////                draw_main_menu_page(lcd, header_veh_data_page, 0, 1, 0, 0);
+////
+////                // save curr menu we are on
+////                //selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
+////            }
+//            // OP MODE
+//            /*else*/ if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
+//                draw_main_menu_page(lcd, main_menus, 0, 0, 0, 2);
 //                // save curr menu we are on
-//                //selected_menu = static_cast<uint8_t>(Menus::VEHICLE_DATA);
+//                selected_menu = static_cast<uint8_t>(Menus::OPERATION_MODE);
 //            }
-            // OP MODE
-            /*else*/ if (virtual_pos == static_cast<int>(Menus::OPERATION_MODE)) {
-                draw_main_menu_page(lcd, main_menus, 0, 0, 0, 2);
-                // save curr menu we are on
-                selected_menu = static_cast<uint8_t>(Menus::OPERATION_MODE);
-            }
-            // VEH LIGHTS
-            else if (virtual_pos == static_cast<int>(Menus::LIGHTS)) {
-                draw_main_menu_page(lcd, main_menus, 0, 1, 0, 2);
-                // save curr menu we are on
-                selected_menu = static_cast<uint8_t>(Menus::LIGHTS);
-            }
-            // RET HOME
-            else if (virtual_pos == static_cast<int>(Menus::RETURN_HOME)) {
-                draw_main_menu_page(lcd, main_menus, 0, 0, 2, 2);
-                // save curr menu we are on
-                selected_menu = static_cast<uint8_t>(Menus::RETURN_HOME);
-            }
-            last_pos = virtual_pos ;
-        }
-    }
-    // submenus
-    else {
-        // resets virtual_pos to 0
-        virtual_pos = virtual_pos - selected_menu;
-
-        // curr submenu
-        selected_submenu = selected_menu;
-        
-        if (virtual_pos != last_pos || first_time_submenu) {
-            first_time_menu = true;
-            first_time_submenu = false;
-                        
-            // vehicle data submenu
-            if (selected_submenu == 0) {
-                // TODO fix hardcoded value | update upper boundary for current submenu
-                virtual_pos = (virtual_pos > 2) ? 2 : virtual_pos;
-                if (virtual_pos == static_cast<int>(VehicleData::DISP_TX_DATA)) {
-                    draw_main_menu_page(lcd, veh_tx_submenu, 0, 0, 0, 2);
-                } else if (virtual_pos == static_cast<int>(VehicleData::DISP_VEH_DATA)) {
-                    draw_main_menu_page(lcd, veh_tx_submenu, 0, 1, 0, 2);
-                    selected_submenu = 10;
-                } else if (virtual_pos == static_cast<int>(VehicleData::CANCEL)) {
-                    draw_main_menu_page(lcd, veh_tx_submenu, 1, 0, 2, 2);
-                }
-            }
-// this will get messy with the virtual pos value
-// a submenu of a submenu?...nah..there's a better way      
-// maybe a third category: main_menu, submenu, and display_page
-//            else if (selected_submenu == 10) {
-//                char veh_data[3][16] = {
-//                    {"T: 30C | H: 76"},
-//                    {"W: 3IN | L: DARK"},
-//                    {"GO BACK"}
-//                };
-//                draw_main_menu_page(lcd, veh_data, 0, 0, 0, 2);
+//            // VEH LIGHTS
+//            else if (virtual_pos == static_cast<int>(Menus::LIGHTS)) {
+//                draw_main_menu_page(lcd, main_menus, 0, 1, 0, 2);
+//                // save curr menu we are on
+//                selected_menu = static_cast<uint8_t>(Menus::LIGHTS);
 //            }
-            last_pos = virtual_pos ;
-        }
-    }
-
-    // option selected
-    if ((!digitalRead(re_sw_pin))) {
-        virtual_pos = selected_menu;
-        if (main_menu_item) {
-            main_menu_item = false;
-        } else {
-            main_menu_item = true;
-        }
-        while (!digitalRead(re_sw_pin)) {
-          delay(10);
-        }
-    }
-}
+//            // RET HOME
+//            else if (virtual_pos == static_cast<int>(Menus::RETURN_HOME)) {
+//                draw_main_menu_page(lcd, main_menus, 0, 0, 2, 2);
+//                // save curr menu we are on
+//                selected_menu = static_cast<uint8_t>(Menus::RETURN_HOME);
+//            }
+//            last_pos = virtual_pos ;
+//        }
+//    }
+//    // submenus
+//    else {
+//        // resets virtual_pos to 0
+//        virtual_pos = virtual_pos - selected_menu;
+//
+//        // curr submenu
+//        selected_submenu = selected_menu;
+//        
+//        if (virtual_pos != last_pos || first_time_submenu) {
+//            first_time_menu = true;
+//            first_time_submenu = false;
+//                        
+//            // vehicle data submenu
+//            if (selected_submenu == 0) {
+//                // TODO fix hardcoded value | update upper boundary for current submenu
+//                virtual_pos = (virtual_pos > 2) ? 2 : virtual_pos;
+//                if (virtual_pos == static_cast<int>(VehicleData::DISP_TX_DATA)) {
+//                    draw_main_menu_page(lcd, veh_tx_submenu, 0, 0, 0, 2);
+//                } else if (virtual_pos == static_cast<int>(VehicleData::DISP_VEH_DATA)) {
+//                    draw_main_menu_page(lcd, veh_tx_submenu, 0, 1, 0, 2);
+//                    selected_submenu = 10;
+//                } else if (virtual_pos == static_cast<int>(VehicleData::CANCEL)) {
+//                    draw_main_menu_page(lcd, veh_tx_submenu, 1, 0, 2, 2);
+//                }
+//            }
+//// this will get messy with the virtual pos value
+//// a submenu of a submenu?...nah..there's a better way      
+//// maybe a third category: main_menu, submenu, and display_page
+////            else if (selected_submenu == 10) {
+////                char veh_data[3][16] = {
+////                    {"T: 30C | H: 76"},
+////                    {"W: 3IN | L: DARK"},
+////                    {"GO BACK"}
+////                };
+////                draw_main_menu_page(lcd, veh_data, 0, 0, 0, 2);
+////            }
+//            last_pos = virtual_pos ;
+//        }
+//    }
+//
+//    // option selected
+//    if ((!digitalRead(re_sw_pin))) {
+//        virtual_pos = selected_menu;
+//        if (main_menu_item) {
+//            main_menu_item = false;
+//        } else {
+//            main_menu_item = true;
+//        }
+//        while (!digitalRead(re_sw_pin)) {
+//          delay(10);
+//        }
+//    }
+//}
 
 /*********************************************************************
 * @fn                - send_data
@@ -612,7 +625,7 @@ void draw_menu_page(LiquidCrystal_I2C& lcd, char menu[][16],
     }
     
     // item 2
-    if (start_item+1 < max_menu_items) {
+    if (start_item < 2) {
         lcd.setCursor(1, 1);
         lcd.print(menu[start_item+1]);
     }      
@@ -635,26 +648,26 @@ void draw_menu_page(LiquidCrystal_I2C& lcd, char menu[][16],
         lcd.write(custom_char_6_id);   
     }
 }
-void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
-                         char menu_items[max_menu_items][max_chars_per_row], 
-                         uint8_t sym_id,
-                         uint8_t sym_pos, 
-                         uint8_t item_row,
-                         uint8_t item_col = 2) {
-    // clear the screen
-    lcd.clear();
-    
-    // symbol/custom char
-    lcd.setCursor(0, sym_pos);
-    lcd.write(sym_id);
-    
-    // item 1
-    lcd.setCursor(item_col, 0);
-    lcd.print(menu_items[item_row]);
-    
-    // item 2
-    if (item_row+1 < max_menu_items) {
-        lcd.setCursor(item_col, 1);
-        lcd.print(menu_items[item_row+1]);
-    }
-}
+//void draw_main_menu_page(LiquidCrystal_I2C& lcd, 
+//                         char menu_items[max_menu_items][max_chars_per_row], 
+//                         uint8_t sym_id,
+//                         uint8_t sym_pos, 
+//                         uint8_t item_row,
+//                         uint8_t item_col = 2) {
+//    // clear the screen
+//    lcd.clear();
+//    
+//    // symbol/custom char
+//    lcd.setCursor(0, sym_pos);
+//    lcd.write(sym_id);
+//    
+//    // item 1
+//    lcd.setCursor(item_col, 0);
+//    lcd.print(menu_items[item_row]);
+//    
+//    // item 2
+//    if (item_row+1 < max_menu_items) {
+//        lcd.setCursor(item_col, 1);
+//        lcd.print(menu_items[item_row+1]);
+//    }
+//}
