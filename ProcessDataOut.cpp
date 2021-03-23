@@ -11,6 +11,7 @@
 #include "RotaryEncoder.h"
 #include "Menus.h"
 #include <Wire.h>               // mpu-6050
+#include "CommandCodes.h"
 
 // helper functions prototypes
 void read_mpu_6050_data();
@@ -53,6 +54,8 @@ const int16_t pwm_y_val = 255;
 uint8_t selected_menu = 0;
 uint8_t selected_submenu = 0;
 
+uint8_t selected_option = static_cast<uint8_t>(CommandCodes::NONE);
+
 // first time loading a menu/submenu flags
 bool first_time_submenu_options = true;
 bool first_time_submenu = true;
@@ -60,6 +63,9 @@ bool first_time_menu = true;
 
 // default menu     
 uint8_t curr_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
+
+// msg buffer to display when command is sent
+char cmd_msg[16];
 
 enum Symbols : uint8_t {
     SELECT_ARROW,
@@ -245,7 +251,6 @@ void process_mpu_6050(Mpu6050::Instance& mpu) {
 *
 * @Note              - none
 *********************************************************************/
-
 void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, char data_in[32]) {
     //normalize min value
     virtual_pos = (virtual_pos < 0) ? 0 : virtual_pos;
@@ -254,7 +259,9 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
     char curr_page[2][16];
 
     // main menu
-    if (curr_menu == static_cast<uint8_t>(ActiveMenu::MAIN_MENU)) {
+    if (curr_menu == static_cast<uint8_t>(ActiveMenu::MAIN_MENU)) {       
+        // reset selected option
+        selected_option = static_cast<uint8_t>(CommandCodes::NONE); 
         
         // if user has turn knob on rot enc, or it's
         // the first time booting up
@@ -302,7 +309,7 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
             /********************************* page 3 *********************************/
             else if (virtual_pos == 4) {
                 sprintf(curr_page[0], "COMMANDS");
-                sprintf(curr_page[1], "");
+                sprintf(curr_page[1], cmd_msg);
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
                 selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS);                
             }
@@ -310,6 +317,7 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
         }
 
     }
+    // commands submenu
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::COMMANDS)) {
         if (virtual_pos != last_pos || first_time_submenu) {
             // update current active menu
@@ -344,6 +352,8 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
             last_pos = virtual_pos ;
         }
     }
+    
+    /*************************** operation mode command options ***************************/
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::OPERATION_MODE)) {
         if (virtual_pos != last_pos || first_time_submenu_options) {
             // update current active menu
@@ -358,19 +368,26 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
                 sprintf(curr_page[0], "MANUAL");
                 sprintf(curr_page[1], "AUTO");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_option = static_cast<uint8_t>(CommandCodes::OP_MANUAL);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
             } else if (virtual_pos == static_cast<int>(OperationMode::AUTO)) {
                 sprintf(curr_page[0], "MANUAL");
                 sprintf(curr_page[1], "AUTO");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
+                selected_option = static_cast<uint8_t>(CommandCodes::OP_AUTO);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
             } else if (virtual_pos == static_cast<int>(OperationMode::CANCEL)) {
                 sprintf(curr_page[0], "BACK");
                 sprintf(curr_page[1], "");
                 draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 0);
                 selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS); 
+                selected_option = static_cast<uint8_t>(CommandCodes::NONE);
             }
             last_pos = virtual_pos ;
         }
     }
+    
+    /*************************** return home command options ***************************/
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::RETURN_HOME)) {
         if (virtual_pos != last_pos || first_time_submenu_options) {
             // update current active menu
@@ -385,15 +402,20 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
                 sprintf(curr_page[0], "CONFIRM");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_option = static_cast<uint8_t>(CommandCodes::RET_HOME);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
             } else if (virtual_pos == static_cast<int>(ReturnHome::CANCEL)) {
                 sprintf(curr_page[0], "CONFIRM");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 1);
                 selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS);
+                selected_option = static_cast<uint8_t>(CommandCodes::NONE);
             }
             last_pos = virtual_pos ;
         }
     }
+    
+    /*************************** lights command option ***************************/
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::LIGHTS)) {
         if (virtual_pos != last_pos || first_time_submenu_options) {
             // update current active menu
@@ -408,19 +430,26 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
                 sprintf(curr_page[0], "ON");
                 sprintf(curr_page[1], "OFF");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_option = static_cast<uint8_t>(CommandCodes::LIGHTS_ON);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
             } else if (virtual_pos == static_cast<int>(Lights::OFF)) {
                 sprintf(curr_page[0], "ON");
                 sprintf(curr_page[1], "OFF");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
+                selected_option = static_cast<uint8_t>(CommandCodes::LIGHTS_OFF);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
             } else if (virtual_pos == static_cast<int>(Lights::AUTO)) {
                 sprintf(curr_page[0], "AUTO");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_option = static_cast<uint8_t>(CommandCodes::LIGHTS_AUTO);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::MAIN_MENU);
             } else if (virtual_pos == static_cast<int>(Lights::CANCEL)) {
                 sprintf(curr_page[0], "AUTO");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 1);
                 selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS);
+                selected_option = static_cast<uint8_t>(CommandCodes::NONE);
             }
             last_pos = virtual_pos ;
         }
@@ -428,8 +457,24 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
 
     // option selected
     if ((!digitalRead(re_sw_pin))) {
+        // navigate to selected menu
         curr_menu = selected_menu;
-        virtual_pos = 0;
+
+        // update command selection (0 if nothing was selected)
+        menu_select = selected_option;
+
+        // if command was sent, navigate to message page
+        if (menu_select != 0) {
+            virtual_pos = 4;
+        } 
+        // reset rot enc position
+        else {
+            virtual_pos = 0;
+        }
+        // msg to be displayed if a command was sent (blank if no cmd)
+        memcpy(cmd_msg, command_msgs[selected_option], sizeof(cmd_msg));
+
+        // wait to prevent debouncing
         while (!digitalRead(re_sw_pin)) {
           delay(10);
         }

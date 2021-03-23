@@ -105,7 +105,8 @@ void loop() {
 //    Serial.print("mpu temp: ");
 //    Serial.println(data_pkg.mpu.temp());
 //	delay(2000);
-    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), data_in);
+    process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), data_in); 
+    Serial.print("option selected: "); Serial.println(data_pkg.menu_select);//delay(2000);
     //process_rot_encoder_isr();
     //process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), init_boot);
 }
