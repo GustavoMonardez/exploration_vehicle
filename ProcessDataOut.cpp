@@ -334,6 +334,7 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
                 sprintf(curr_page[0], "LIGHTS");
                 sprintf(curr_page[1], "BACK");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::LIGHTS);
             } else if (virtual_pos == static_cast<int>(Commands::CANCEL)) {
                 sprintf(curr_page[0], "LIGHTS");
                 sprintf(curr_page[1], "BACK");
@@ -394,7 +395,35 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
         }
     }
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::LIGHTS)) {
-        
+        if (virtual_pos != last_pos || first_time_submenu_options) {
+            // update current active menu
+            first_time_menu = true;
+            first_time_submenu = true;
+            first_time_submenu_options = false;
+
+            // normalize max value
+            virtual_pos = (virtual_pos > 3) ? 3 : virtual_pos;
+
+            if (virtual_pos == static_cast<int>(Lights::ON)) {
+                sprintf(curr_page[0], "ON");
+                sprintf(curr_page[1], "OFF");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+            } else if (virtual_pos == static_cast<int>(Lights::OFF)) {
+                sprintf(curr_page[0], "ON");
+                sprintf(curr_page[1], "OFF");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
+            } else if (virtual_pos == static_cast<int>(Lights::AUTO)) {
+                sprintf(curr_page[0], "AUTO");
+                sprintf(curr_page[1], "BACK");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+            } else if (virtual_pos == static_cast<int>(Lights::CANCEL)) {
+                sprintf(curr_page[0], "AUTO");
+                sprintf(curr_page[1], "BACK");
+                draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 1);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS);
+            }
+            last_pos = virtual_pos ;
+        }
     }
 
     // option selected

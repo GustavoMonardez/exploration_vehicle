@@ -45,5 +45,5 @@ enum class Lights {
     ON,
     OFF,
     AUTO,
-    BACK  
+    CANCEL  
 };
