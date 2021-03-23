@@ -93,7 +93,7 @@ void loop() {
 //    Serial.println(data_pkg.j1.down);
 //    Serial.print("up: ");
 //    Serial.println(data_pkg.j1.up);
-    process_mpu_6050(data_pkg.mpu);
+//    process_mpu_6050(data_pkg.mpu);
 //    Serial.print("mpu left: ");
 //    Serial.println(data_pkg.mpu.left());
 //    Serial.print("mpu right: ");
@@ -105,7 +105,13 @@ void loop() {
 //    Serial.print("mpu temp: ");
 //    Serial.println(data_pkg.mpu.temp());
 //	delay(2000);
+    
+    process_joystick_alt(data_pkg.j1);
+    process_joystick(data_pkg.j2);
+    process_mpu_6050(data_pkg.mpu);
     process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), data_in); 
+    
+    send_data(transmitter, data_pkg);
     Serial.print("option selected: "); Serial.println(data_pkg.menu_select);//delay(2000);
     //process_rot_encoder_isr();
     //process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), init_boot);
