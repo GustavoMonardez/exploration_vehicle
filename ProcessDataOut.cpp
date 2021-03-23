@@ -329,6 +329,7 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
                 sprintf(curr_page[0], "OPERATION MODE");
                 sprintf(curr_page[1], "RETURN HOME");
                 draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 1);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::RETURN_HOME);
             } else if (virtual_pos == static_cast<int>(Commands::LIGHTS)) {
                 sprintf(curr_page[0], "LIGHTS");
                 sprintf(curr_page[1], "BACK");
@@ -370,7 +371,27 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
         }
     }
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::RETURN_HOME)) {
-        
+        if (virtual_pos != last_pos || first_time_submenu_options) {
+            // update current active menu
+            first_time_menu = true;
+            first_time_submenu = true;
+            first_time_submenu_options = false;
+
+            // normalize max value
+            virtual_pos = (virtual_pos > 1) ? 1 : virtual_pos;
+
+            if (virtual_pos == static_cast<int>(ReturnHome::CONFIRM)) {
+                sprintf(curr_page[0], "CONFIRM");
+                sprintf(curr_page[1], "BACK");
+                draw_menu_page(lcd, curr_page, 0, Symbols::SELECT_ARROW, 0);
+            } else if (virtual_pos == static_cast<int>(ReturnHome::CANCEL)) {
+                sprintf(curr_page[0], "CONFIRM");
+                sprintf(curr_page[1], "BACK");
+                draw_menu_page(lcd, curr_page, 0, Symbols::BACK_ARROW, 1);
+                selected_menu = static_cast<uint8_t>(ActiveMenu::COMMANDS);
+            }
+            last_pos = virtual_pos ;
+        }
     }
     else if (curr_menu == static_cast<uint8_t>(ActiveMenu::LIGHTS)) {
         
