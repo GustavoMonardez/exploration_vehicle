@@ -13,6 +13,7 @@
 #include <Wire.h>               // mpu-6050
 #include "CommandCodes.h"
 
+
 // helper functions prototypes
 void read_mpu_6050_data();
 int16_t get_calibrated_x_acc();
@@ -487,14 +488,15 @@ void process_display(LiquidCrystal_I2C& lcd, uint8_t& menu_select, int8_t temp, 
 *
 * @brief             - send data from all modules via NRF24
 *
-* @param[in]         - none
+* @param[in]         - RF24 transmitter instance to transmit over
+* @param[in]         - data to send
 * 
 * @return            - none
 *
 * @Note              - none
 *********************************************************************/
-void send_data() {
-    
+void send_data(RF24& transmitter, DataPackage& data_pkg) {
+    transmitter.write(&data_pkg, sizeof(data_pkg));
 }
 
 // helper functions

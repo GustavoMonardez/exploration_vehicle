@@ -16,6 +16,7 @@
 #include <SPI.h>
 #include "Joystick.h"
 #include "Mpu6050.h"
+#include "DataPackage.h"
 
 
 namespace Globals {
@@ -42,13 +43,5 @@ namespace Globals {
     const uint8_t start_data_addr   = 0x3B;
 
 	// outgoing data
-	struct DataPackage {
-		Joystick j1;
-		Joystick j2;
-		
-        Mpu6050::Instance mpu;
-
-        uint8_t menu_select;
-	};
 	DataPackage data_pkg;
 }
