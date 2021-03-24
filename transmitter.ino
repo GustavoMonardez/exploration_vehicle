@@ -36,6 +36,10 @@ using Globals::j1_vrx_pin;
 using Globals::j1_vry_pin;
 using Globals::j1_sw_pin;
 
+using Globals::j2_vrx_pin;
+using Globals::j2_vry_pin;
+using Globals::j2_sw_pin;
+
 // lcd
 using Globals::lcd;
 
@@ -64,6 +68,10 @@ void setup() {
                     j1_vrx_pin, INPUT, 
                     j1_vry_pin, INPUT,
                     j1_sw_pin, INPUT_PULLUP);
+    config_joystick(data_pkg.j2,
+                    j2_vrx_pin, INPUT, 
+                    j2_vry_pin, INPUT,
+                    j2_sw_pin, INPUT_PULLUP);
     config_mpu_6050(mpu_addr, pwr_mgmt_1, start_data_addr);
     config_display(lcd);
     config_rot_encoder();
@@ -112,7 +120,7 @@ void loop() {
     process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), data_in); 
     
     send_data(transmitter, data_pkg);
-    Serial.print("option selected: "); Serial.println(data_pkg.menu_select);//delay(2000);
+    Serial.print("j2-up: "); Serial.println(data_pkg.j2.up);//delay(2000);
     //process_rot_encoder_isr();
     //process_display(lcd, data_pkg.menu_select, data_pkg.mpu.temp(), init_boot);
 }
